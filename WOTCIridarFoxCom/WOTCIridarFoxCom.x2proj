@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Default" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Guid>6d4256d7-4f3d-4589-859e-90bb8c918129</Guid>
+    <Name>WOTCIridarFoxCom</Name>
+    <Description>A massive overhaul of the entire game.</Description>
+    <SteamPublishID>0</SteamPublishID>
+    <AssemblyName>WOTCIridarFoxCom</AssemblyName>
+    <RootNamespace>WOTCIridarFoxCom</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    
+    
+    <Folder Include="Config\" />
+    <Folder Include="Config\Base\" />
+    <Folder Include="Localization\" />
+    <Folder Include="Src\" />
+    <Folder Include="Content\" />
+    <Folder Include="ContentForCook\" />
+    <Folder Include="Src\WOTCIridarFoxCom\" />
+    <Folder Include="Src\WOTCIridarFoxCom\Classes\" />
+  </ItemGroup>
+  <ItemGroup>
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    <Content Include="ReadMe.txt" />
+    <Content Include="ModPreview.jpg" />
+    <Content Include="ContentOptions.json" />
+    <Content Include="Config\Base\XComEditor.ini" />
+    <Content Include="Config\Base\XComEngine.ini" />
+    <Content Include="Config\Base\XComGame.ini" />
+    <Content Include="Config\XComTemplateCreator.ini" />
+    <Content Include="Config\XComTemplateEditor.ini" />
+    <Content Include="Localization\XComGame.int" />
+    <Content Include="Localization\WOTCIridarFoxCom.int" />
+    <Content Include="Src\extra_globals.uci" />
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2DLCInfo_WOTCIridarFoxCom.uc" />
+    <Content Include="Src\WOTCIridarFoxCom\Classes\Help.uc" />
+    <Content Include="Src\WOTCIridarFoxCom\Classes\ConfigEngine.uc" />
+  </ItemGroup>
+  <PropertyGroup>
+    <SolutionRoot>$(MSBuildProjectDirectory)\..\</SolutionRoot>
+    <ScriptsDir>$(SolutionRoot).scripts\\</ScriptsDir>
+    <BuildCommonRoot>$(ScriptsDir)X2ModBuildCommon\</BuildCommonRoot>
+  </PropertyGroup>
+  <Import Project="$(BuildCommonRoot)XCOM2.targets" />
+</Project>
