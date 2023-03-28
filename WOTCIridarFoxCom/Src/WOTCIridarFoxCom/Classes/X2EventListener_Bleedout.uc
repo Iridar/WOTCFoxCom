@@ -1,10 +1,13 @@
-class X2EventListener_Tactical extends X2EventListener;
+class X2EventListener_Bleedout extends X2EventListener;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
 	local array<X2DataTemplate> Templates;
 
-	Templates.AddItem(Create_ListenerTemplate());
+	if (`GetMCMSettingBool("PATCH_BLEEDOUT"))
+	{
+		Templates.AddItem(Create_ListenerTemplate());
+	}
 
 	return Templates;
 }
@@ -24,7 +27,7 @@ static private function CHEventListenerTemplate Create_ListenerTemplate()
 {
 	local CHEventListenerTemplate Template;
 
-	`CREATE_X2TEMPLATE(class'CHEventListenerTemplate', Template, 'IRI_FOXCOM_X2EventListener_Tactical');
+	`CREATE_X2TEMPLATE(class'CHEventListenerTemplate', Template, 'IRI_FOXCOM_X2EventListener_Bleedout_Tactical');
 
 	Template.RegisterInTactical = true;
 	Template.RegisterInStrategy = false;
@@ -70,6 +73,7 @@ static private function EventListenerReturn OnOverrideBleedoutChance(Object Even
 
 	return ELR_NoInterrupt;
 }
+
 static private function EventListenerReturn OnUnitBleedingOut(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
 	local XComGameState_Unit	UnitState;

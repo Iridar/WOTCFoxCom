@@ -90,7 +90,10 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2DLCInfo_WOTCIridarFoxCom.uc" />
     <Content Include="Src\WOTCIridarFoxCom\Classes\Help.uc" />
     <Content Include="Src\WOTCIridarFoxCom\Classes\ConfigEngine.uc" />
-    <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_Tactical.uc">
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_Bleedout.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_WoundTimers.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

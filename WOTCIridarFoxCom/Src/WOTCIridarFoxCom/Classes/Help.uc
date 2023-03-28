@@ -5,6 +5,12 @@
 
 class Help extends Object abstract;
 
+
+
+
+
+
+
 /*
 
 ### Creating and Submitting a Game State
@@ -469,3 +475,4 @@ static final function bool IsItemUniqueEquipInSlot(X2ItemTemplateManager ItemMgr
 
 	return ItemMgr.ItemCategoryIsUniqueEquip(ItemTemplate.ItemCat) || WeaponTemplate != none && ItemMgr.ItemCategoryIsUniqueEquip(WeaponTemplate.WeaponCat);
 }
+
