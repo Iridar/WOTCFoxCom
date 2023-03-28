@@ -7,10 +7,9 @@
     <SteamPublishID>0</SteamPublishID>
     <AssemblyName>WOTCIridarFoxCom</AssemblyName>
     <RootNamespace>WOTCIridarFoxCom</RootNamespace>
+    <ProjectGuid>{82598644-8483-4d90-a51f-14116c002cf0}</ProjectGuid>
   </PropertyGroup>
   <ItemGroup>
-    
-    
     <Folder Include="Config\" />
     <Folder Include="Config\Base\" />
     <Folder Include="Localization\" />
@@ -21,19 +20,6 @@
     <Folder Include="Src\WOTCIridarFoxCom\Classes\" />
   </ItemGroup>
   <ItemGroup>
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     <Content Include="ReadMe.txt" />
     <Content Include="ModPreview.jpg" />
     <Content Include="ContentOptions.json" />
