@@ -1,4 +1,4 @@
-`define AMLOG(msg) `LOG(GetFuncName() @ `msg, /* class'WOTCIridarFoxCom_Defaults'.default.VERSION_CFG > class'WOTCIridarFoxCom_MCMScreen'.default.VERSION_CFG ? class'WOTCIridarFoxCom_Defaults'.default.DEBUG_LOGGING : class'WOTCIridarFoxCom_MCMScreen'.default.DEBUG_LOGGING */, 'WOTCIridarFoxCom')
+`define AMLOG(msg) `LOG(GetFuncName() @ `msg, /* class'WOTCIridarFoxCom_Defaults'.default.VERSION_CFG > class'WOTCIridarFoxCom_MCMScreen'.default.VERSION_CFG ? class'WOTCIridarFoxCom_Defaults'.default.DEBUG_LOGGING : class'WOTCIridarFoxCom_MCMScreen'.default.DEBUG_LOGGING */, 'FOXCOM')
 
 `define CAPS(VarName) class'UIUtilities_Text'.static.CapsCheckForGermanScharfesS(`VarName)
 
@@ -15,3 +15,5 @@
 `define GetConfigArrayInt(VarName) class'ConfigEngine'.static.GetConfigArrayInt(`VarName)
 `define GetConfigArrayFloat(VarName) class'ConfigEngine'.static.GetConfigArrayFloat(`VarName)
 
+
+`define GetMCMSettingBool(VarName) class'WOTCIridarFoxCom_MCMScreen'.static.GetMCMSettingBool(`VarName)

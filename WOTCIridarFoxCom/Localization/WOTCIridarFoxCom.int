@@ -1,2 +1,8 @@
 [Help]
-SomeString = "localized_value"
+
+
+[WOTCIridarFoxCom_MCMScreen]
+
+ModName = "FOXCOM"
+PageTitle = "FOXCOM"
+GroupHeader_Combat = "COMBAT SETTINGS"
