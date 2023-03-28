@@ -1,5 +1,7 @@
 [Help]
 
+PATCH_BLEEDOUT_Label = "Patch Bleedout"
+PATCH_BLEEDOUT_Tip = "If true, FOXCOM will override bleedout rules with the following changes: bleedout is guaranteed, but the duration depends on the overkill damage."
 
 [WOTCIridarFoxCom_MCMScreen]
 

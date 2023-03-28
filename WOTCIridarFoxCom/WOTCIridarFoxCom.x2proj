@@ -90,6 +90,9 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2DLCInfo_WOTCIridarFoxCom.uc" />
     <Content Include="Src\WOTCIridarFoxCom\Classes\Help.uc" />
     <Content Include="Src\WOTCIridarFoxCom\Classes\ConfigEngine.uc" />
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_Tactical.uc">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <PropertyGroup>
     <SolutionRoot>$(MSBuildProjectDirectory)\..\</SolutionRoot>
