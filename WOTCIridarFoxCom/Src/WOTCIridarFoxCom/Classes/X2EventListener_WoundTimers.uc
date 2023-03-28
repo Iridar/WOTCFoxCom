@@ -1,6 +1,21 @@
-class X2EventListener_WoundTimers extends X2EventListener;
+class X2EventListener_WoundTimers extends X2EventListener config(StrategyTuning);
 
 var private name WoundTimerValue;
+
+struct native HealingThresholdStruct
+{
+	var float MinHealthPercent;
+	var float MaxHealthPercent;
+
+	var float   MinHealingDays;
+	var float	MaxHealingDays;
+
+	var int   Difficulty;
+};
+var config array<HealingThresholdStruct> HealingThresholds;
+var config array<float> HealedHealthWoundTimeReduction;
+
+
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -26,6 +41,7 @@ static function array<X2DataTemplate> CreateTemplates()
 'OnTacticalBeginPlay', X2TacticalGameRuleset, none, NewGameState
 */
 
+// Increase total healing time each turn
 static function CHEventListenerTemplate Create_ListenerTemplate_Tactical()
 {
 	local CHEventListenerTemplate Template;
@@ -49,8 +65,8 @@ static private function EventListenerReturn OnPlayerTurnEnded(Object EventData, 
 	local XComGameState_Unit	UnitState;
 	local XComGameStateHistory	History;
 	local XComGameState_Player	PlayerState;
-	local UnitValue				UV;
-	local int					AddRecoveryTime;
+	local float					ExtraHealingTime;
+
 
 	if (!`GetMCMSettingBool("PATCH_WOUND_TIMERS"))
 		return ELR_NoInterrupt;
@@ -72,15 +88,12 @@ static private function EventListenerReturn OnPlayerTurnEnded(Object EventData, 
 		
 		// If we're here, this is a player-controlled unit that is wounded
 
-		AddRecoveryTime = UnitState.GetMaxStat(eStat_HP) - UnitState.GetCurrentStat(eStat_HP);
-		UnitState.GetUnitValue(default.WoundTimerValue, UV);
+		ExtraHealingTime = CalculateExtraHealingTime(UnitState);
 
-		`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Current recovery time:" @ UV.fValue @ "Adding recovery time:" @ AddRecoveryTime);
-
-		UV.fValue += AddRecoveryTime;
+		`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Adding Healing Time:" @ ExtraHealingTime);
 		
 		UnitState = XComGameState_Unit(NewGameState.ModifyStateObject(UnitState.Class, UnitState.ObjectID));
-		UnitState.SetUnitFloatValue(default.WoundTimerValue, UV.fValue, eCleanup_BeginTactical);
+		UnitState.SetUnitFloatValue(default.WoundTimerValue, ExtraHealingTime, eCleanup_BeginTactical);
 	}
 
 	if (NewGameState.GetNumGameStateObjects() > 0)
@@ -94,6 +107,51 @@ static private function EventListenerReturn OnPlayerTurnEnded(Object EventData, 
 
 	return ELR_NoInterrupt;
 }
+static private function float CalculateExtraHealingTime(const XComGameState_Unit UnitState)
+{
+	local UnitValue		UV;
+	local int			Difficulty;
+	local float			HealthPercent;
+	local float			HealedHP;
+	local float			AdjustedLowestHP;
+	local float			HealingTime;
+	local HealingThresholdStruct HealingThreshold;
+
+	!UnitState.GetUnitValue(default.WoundTimerValue, UV);
+
+	Difficulty = `StrategyDifficultySetting;
+
+	HealedHP = UnitState.GetCurrentStat(eStat_HP) - UnitState.LowestHP;
+
+	AdjustedLowestHP = UnitState.LowestHP + HealedHP * default.HealedHealthWoundTimeReduction[Difficulty];
+
+	HealthPercent = AdjustedLowestHP / UnitState.GetMaxStat(eStat_HP);
+
+	`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Lowest HP:" @ UnitState.LowestHP @ `ShowVar(HealedHP)  @ `ShowVar(AdjustedLowestHP) @ "Max HP:" @ UnitState.GetMaxStat(eStat_HP) @ `ShowVar(HealthPercent) @ `ShowVar(Difficulty));
+
+	foreach default.HealingThresholds(HealingThreshold)
+	{
+		if (HealingThreshold.Difficulty != Difficulty)
+			continue;
+
+		if (HealingThreshold.MinHealthPercent >= HealthPercent && HealthPercent < HealingThreshold.MaxHealthPercent)
+		{
+			 // [x; y] rand essentially
+			HealingTime = HealingThreshold.MinHealingDays;
+			HealingTime += (HealingThreshold.MaxHealingDays - HealingThreshold.MinHealingDays) * `SYNC_FRAND_STATIC();
+			 
+			`AMLOG("PATCH_WOUND_TIMERS" @ "Healing Threshold Percent:" @ HealingThreshold.MinHealthPercent @ "-" @ HealingThreshold.MaxHealthPercent @ "Days" @ HealingThreshold.MinHealingDays @ "-" @ HealingThreshold.MaxHealingDays @ "Generated time:" @ HealingTime);
+			`AMLOG("PATCH_WOUND_TIMERS" @ "Previous Healing Time:" @ UV.fValue @ "new Healing Time:" @ HealingTime + UV.fValue);
+
+			return HealingTime + UV.fValue; 
+		}
+	}	
+
+	`AMLOG("PATCH_WOUND_TIMERS WARNING" @ UnitState.GetFullName() @ "Failed to find a fitting Healing Threshold! Check XComStrategyTuning.ini.");
+	return 0;
+}
+
+// When tactical ends, assign accumulated healing time
 
 static function CHEventListenerTemplate Create_ListenerTemplate_Strategy()
 {
@@ -178,6 +236,9 @@ static private function EventListenerReturn OnPostMissionUpdateSoldierHealing(Ob
 
 	return ELR_NoInterrupt;
 }
+
+
+
 
 defaultproperties
 {

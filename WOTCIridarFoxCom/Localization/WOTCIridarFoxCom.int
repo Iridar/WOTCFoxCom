@@ -4,7 +4,7 @@ PATCH_BLEEDOUT_Label = "Patch Bleedout"
 PATCH_BLEEDOUT_Tip = "If true, FOXCOM will override bleedout rules with the following changes: bleedout is guaranteed, but the duration depends on the overkill damage."
 
 
-0PATCH_WOUND_TIMERS_Label = "Patch Wound Timers"
+PATCH_WOUND_TIMERS_Label = "Patch Wound Timers"
 PATCH_WOUND_TIMERS_Tip = "If true, FOXCOM will override wound recovery times with the following changes: wound recovery depends on how long the unit has spent in combat while wounded and on that wound's severity."
 
 [WOTCIridarFoxCom_MCMScreen]

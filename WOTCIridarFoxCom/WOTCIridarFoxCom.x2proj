@@ -22,6 +22,9 @@
     <Folder Include="Src\WOTCIridarFoxCom\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\XComStrategyTuning.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComWOTCIridarFoxCom_DEFAULT.ini">
       <SubType>Content</SubType>
     </Content>
