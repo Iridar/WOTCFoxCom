@@ -1,4 +1,4 @@
-class X2EventListener_WoundTimers extends X2EventListener config(StrategyTuning);
+class X2EventListener_WoundTimers extends X2EventListener config(WoundTimers);
 
 var private name WoundTimerValue;
 
@@ -14,8 +14,16 @@ struct native HealingThresholdStruct
 };
 var config array<HealingThresholdStruct> HealingThresholds;
 var config array<float> HealedHealthWoundTimeReduction;
+var config array<WoundSeverity> WoundSeverities;
 
+static final function OnPreCreateTemplates()
+{
+	if (!`GetMCMSettingBool("PATCH_WOUND_TIMERS"))
+		return;
 
+	// This will make the game use our Wound Severities when calculating wound recovery time.
+	class'X2StrategyGameRulesetDataStructures'.default.WoundSeverities = default.WoundSeverities;
+}
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -117,24 +125,33 @@ static private function float CalculateExtraHealingTime(const XComGameState_Unit
 	local float			HealingTime;
 	local HealingThresholdStruct HealingThreshold;
 
-	!UnitState.GetUnitValue(default.WoundTimerValue, UV);
+	UnitState.GetUnitValue(default.WoundTimerValue, UV);
 
 	Difficulty = `StrategyDifficultySetting;
 
-	HealedHP = UnitState.GetCurrentStat(eStat_HP) - UnitState.LowestHP;
+	if (UnitState.IsBleedingOut())
+	{
+		`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "is bleeding out.");
 
-	AdjustedLowestHP = UnitState.LowestHP + HealedHP * default.HealedHealthWoundTimeReduction[Difficulty];
+		HealthPercent = -1;
+	}
+	else
+	{
+		HealedHP = UnitState.GetCurrentStat(eStat_HP) - UnitState.LowestHP;
 
-	HealthPercent = AdjustedLowestHP / UnitState.GetMaxStat(eStat_HP);
+		AdjustedLowestHP = UnitState.LowestHP + HealedHP * default.HealedHealthWoundTimeReduction[Difficulty];
 
-	`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Lowest HP:" @ UnitState.LowestHP @ `ShowVar(HealedHP)  @ `ShowVar(AdjustedLowestHP) @ "Max HP:" @ UnitState.GetMaxStat(eStat_HP) @ `ShowVar(HealthPercent) @ `ShowVar(Difficulty));
+		HealthPercent = AdjustedLowestHP / UnitState.GetMaxStat(eStat_HP);
+
+		`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Lowest HP:" @ UnitState.LowestHP @ `ShowVar(HealedHP)  @ `ShowVar(AdjustedLowestHP) @ "Max HP:" @ UnitState.GetMaxStat(eStat_HP) @ `ShowVar(HealthPercent));
+	}
 
 	foreach default.HealingThresholds(HealingThreshold)
 	{
 		if (HealingThreshold.Difficulty != Difficulty)
 			continue;
 
-		if (HealingThreshold.MinHealthPercent >= HealthPercent && HealthPercent < HealingThreshold.MaxHealthPercent)
+		if (HealingThreshold.MinHealthPercent <= HealthPercent && HealthPercent < HealingThreshold.MaxHealthPercent)
 		{
 			 // [x; y] rand essentially
 			HealingTime = HealingThreshold.MinHealingDays;
@@ -177,7 +194,7 @@ static private function EventListenerReturn OnPostMissionUpdateSoldierHealing(Ob
 	local XComLWTuple			Tuple;
 	local UnitValue				UV;
 	local XComGameState_HeadquartersProjectHealSoldier ProjectState;
-	local XComGameState_HeadquartersProjectHealSoldier OldProjectState;
+	//local XComGameState_HeadquartersProjectHealSoldier OldProjectState;
 
 	if (!`GetMCMSettingBool("PATCH_WOUND_TIMERS"))
 		return ELR_NoInterrupt;
@@ -210,24 +227,25 @@ static private function EventListenerReturn OnPostMissionUpdateSoldierHealing(Ob
 	{
 		if (ProjectState.ProjectFocus.ObjectID == UnitState.ObjectID)
 		{
-			OldProjectState = XComGameState_HeadquartersProjectHealSoldier(`XCOMHISTORY.GetGameStateForObjectID(ProjectState.ObjectID,, GameState.HistoryIndex - 1));
+			//OldProjectState = XComGameState_HeadquartersProjectHealSoldier(`XCOMHISTORY.GetGameStateForObjectID(ProjectState.ObjectID,, GameState.HistoryIndex - 1));
 
 			NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("FOXCOM PATCH_WOUND_TIMERS" @ UnitState.GetFullName());
 			ProjectState = XComGameState_HeadquartersProjectHealSoldier(NewGameState.ModifyStateObject(ProjectState.Class, ProjectState.ObjectID));
 
-			if (OldProjectState != none)
-			{
-				ProjectState.BlockPointsRemaining = OldProjectState.BlockPointsRemaining;
-				ProjectState.ProjectPointsRemaining = OldProjectState.ProjectPointsRemaining;
-			}
-			else
-			{
-				ProjectState.BlockPointsRemaining = 0;
-				ProjectState.ProjectPointsRemaining = 0;
-			}
-			ProjectState.AddRecoveryDays(UV.fValue);
+			//if (OldProjectState != none)
+			//{
+			//	ProjectState.BlockPointsRemaining = OldProjectState.BlockPointsRemaining;
+			//	ProjectState.ProjectPointsRemaining = OldProjectState.ProjectPointsRemaining;
+			//}
+			//else
+			//{
+			//	ProjectState.BlockPointsRemaining = 0;
+			//	ProjectState.ProjectPointsRemaining = 0;
+			//}
 
 			`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Adding" @ int(UV.fValue) @ "days of healing time.");
+
+			ProjectState.AddRecoveryDays(UV.fValue);
 
 			`GAMERULES.SubmitGameState(NewGameState);
 			break;

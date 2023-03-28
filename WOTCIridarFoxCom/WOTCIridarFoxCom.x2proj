@@ -22,10 +22,13 @@
     <Folder Include="Src\WOTCIridarFoxCom\Classes\" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Config\XComStrategyTuning.ini">
+    <Content Include="Config\XComGameData.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComWOTCIridarFoxCom_DEFAULT.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\XComWoundTimers.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="ReadMe.txt" />
