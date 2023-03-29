@@ -61,13 +61,14 @@ static function CHEventListenerTemplate Create_ListenerTemplate_Tactical()
 
 	if (`GetMCMSettingBool("PATCH_WOUND_TIMERS"))
 	{	
-		Template.AddCHEvent('PlayerTurnEnded', OnPlayerTurnEnded, ELD_OnStateSubmitted, 50);
+		// Using on turn begin so that extra wound time isn't applied if the wound happened on the very last turn
+		Template.AddCHEvent('PlayerTurnBegun', OnPlayerTurnBegun, ELD_OnStateSubmitted, 50);
 	}
 
 	return Template;
 }
 
-static private function EventListenerReturn OnPlayerTurnEnded(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
+static private function EventListenerReturn OnPlayerTurnBegun(Object EventData, Object EventSource, XComGameState GameState, Name Event, Object CallbackData)
 {
 	local XComGameState			NewGameState;
 	local XComGameState_Unit	UnitState;
