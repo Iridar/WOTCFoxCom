@@ -1,29 +1,25 @@
 class X2EventListener_WoundTimers extends X2EventListener config(WoundTimers);
 
-var private name WoundTimerValue;
+// Wound Timers in base game are highly inconsistent. They depend on the soldier's missing percent HP,
+// and are heavily randomized.
+// FOXCOM changes this logic in the following ways:
+// 1. The base wound recovery time is flat and depends on how many points of HP need to be recovered, 
+// where each point takes X days to recover.
+// 2. Each turn the soldier spends wounded, extra healing time is added depending on how badly the soldier is wounded.
+// 3. If the soldier is healed up, this extra time is reduced or removed completely.
+// This creates an incentive to evacuate heavily wounded soldiers early, and increases the importance of mid-mission healing.
 
-struct native HealingThresholdStruct
-{
-	var float MinHealthPercent;
-	var float MaxHealthPercent;
+var private name				WoundTimerValue;
 
-	var float   MinHealingDays;
-	var float	MaxHealingDays;
+var private config float		BaseHealingTimeDaysPerMissingHP;
+var private config array<float>	ExtraHealingTimeDaysPerTurnWoundedScaling;
+var private config array<float>	HealedHealthWoundTimeReduction;
 
-	var int   Difficulty;
-};
-var config array<HealingThresholdStruct> HealingThresholds;
-var config array<float> HealedHealthWoundTimeReduction;
-var config array<WoundSeverity> WoundSeverities;
-
-static final function OnPreCreateTemplates()
-{
-	if (!`GetMCMSettingBool("PATCH_WOUND_TIMERS"))
-		return;
-
-	// This will make the game use our Wound Severities when calculating wound recovery time.
-	class'X2StrategyGameRulesetDataStructures'.default.WoundSeverities = default.WoundSeverities;
-}
+//static final function OnPreCreateTemplates()
+//{
+//	if (!`GetMCMSettingBool("PATCH_WOUND_TIMERS"))
+//		return;
+//}
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -124,49 +120,23 @@ static private function float CalculateExtraHealingTime(const XComGameState_Unit
 	local float			HealedHP;
 	local float			AdjustedLowestHP;
 	local float			HealingTime;
-	local HealingThresholdStruct HealingThreshold;
-
-	UnitState.GetUnitValue(default.WoundTimerValue, UV);
 
 	Difficulty = `StrategyDifficultySetting;
+	UnitState.GetUnitValue(default.WoundTimerValue, UV);
 
-	if (UnitState.IsBleedingOut())
-	{
-		`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "is bleeding out.");
+	HealedHP = UnitState.GetCurrentStat(eStat_HP) - UnitState.LowestHP;
 
-		HealthPercent = -1;
-	}
-	else
-	{
-		HealedHP = UnitState.GetCurrentStat(eStat_HP) - UnitState.LowestHP;
+	AdjustedLowestHP = UnitState.LowestHP + HealedHP * default.HealedHealthWoundTimeReduction[Difficulty];
 
-		AdjustedLowestHP = UnitState.LowestHP + HealedHP * default.HealedHealthWoundTimeReduction[Difficulty];
+	HealthPercent = UnitState.GetCurrentStat(eStat_HP) / UnitState.GetMaxStat(eStat_HP);
 
-		HealthPercent = AdjustedLowestHP / UnitState.GetMaxStat(eStat_HP);
+	`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Lowest HP:" @ UnitState.LowestHP @ `ShowVar(HealedHP)  @ `ShowVar(AdjustedLowestHP) @ "Max HP:" @ UnitState.GetMaxStat(eStat_HP) @ `ShowVar(HealthPercent));
+	
+	HealingTime = default.ExtraHealingTimeDaysPerTurnWoundedScaling[Difficulty] * (1 - HealthPercent);
 
-		`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Lowest HP:" @ UnitState.LowestHP @ `ShowVar(HealedHP)  @ `ShowVar(AdjustedLowestHP) @ "Max HP:" @ UnitState.GetMaxStat(eStat_HP) @ `ShowVar(HealthPercent));
-	}
+	`AMLOG("PATCH_WOUND_TIMERS" @ "previous extra Healing Time:" @ UV.fValue @ ", calculated extra Healing Time:" @ HealingTime @ ", total extra Healing Time:" @ HealingTime + UV.fValue);
 
-	foreach default.HealingThresholds(HealingThreshold)
-	{
-		if (HealingThreshold.Difficulty != Difficulty)
-			continue;
-
-		if (HealingThreshold.MinHealthPercent <= HealthPercent && HealthPercent < HealingThreshold.MaxHealthPercent)
-		{
-			 // [x; y] rand essentially
-			HealingTime = HealingThreshold.MinHealingDays;
-			HealingTime += (HealingThreshold.MaxHealingDays - HealingThreshold.MinHealingDays) * `SYNC_FRAND_STATIC();
-			 
-			`AMLOG("PATCH_WOUND_TIMERS" @ "Healing Threshold Percent:" @ HealingThreshold.MinHealthPercent @ "-" @ HealingThreshold.MaxHealthPercent @ "Days" @ HealingThreshold.MinHealingDays @ "-" @ HealingThreshold.MaxHealingDays @ "Generated time:" @ HealingTime);
-			`AMLOG("PATCH_WOUND_TIMERS" @ "Previous Healing Time:" @ UV.fValue @ "new Healing Time:" @ HealingTime + UV.fValue);
-
-			return HealingTime + UV.fValue; 
-		}
-	}	
-
-	`AMLOG("PATCH_WOUND_TIMERS WARNING" @ UnitState.GetFullName() @ "Failed to find a fitting Healing Threshold! Check XComStrategyTuning.ini.");
-	return 0;
+	return HealingTime + UV.fValue;
 }
 
 // When tactical ends, assign accumulated healing time
@@ -194,6 +164,9 @@ static private function EventListenerReturn OnPostMissionUpdateSoldierHealing(Ob
 	local XComGameState_Unit	UnitState;
 	local XComLWTuple			Tuple;
 	local UnitValue				UV;
+	local float					BaseHealingTime;
+	local float					ExtraHealingTime;
+	local int					TotalHealingTime;
 	local XComGameState_HeadquartersProjectHealSoldier ProjectState;
 	//local XComGameState_HeadquartersProjectHealSoldier OldProjectState;
 
@@ -218,16 +191,18 @@ static private function EventListenerReturn OnPostMissionUpdateSoldierHealing(Ob
 		return ELR_NoInterrupt;
 	}
 
-	if (!UnitState.GetUnitValue(default.WoundTimerValue, UV))
-	{
-		`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Exiting because the Unit doesn't have a Unit Timer value.");
-		return ELR_NoInterrupt;
-	}
-
 	foreach GameState.IterateByClassType(class'XComGameState_HeadquartersProjectHealSoldier', ProjectState)
 	{
 		if (ProjectState.ProjectFocus.ObjectID == UnitState.ObjectID)
 		{
+			// Old Project State is the healing project that already existed for this soldier before the mission,
+			// because they went on the mission wounded.
+			// but do we really want to double the healing time?
+			// Scenario:
+			// Soldier went on a mission, get wounded, returned with X base healing time + Y extra.
+			// Went on another mission wounded, returned with P base healing time + Q extra, 
+			// Both P and Q will be extra big, and already include X and  roughly Y (if soldier is not healed up at mission start)
+			// So if we grab Old Project State here, we're gonna essentially double the healing time for no good reason.
 			//OldProjectState = XComGameState_HeadquartersProjectHealSoldier(`XCOMHISTORY.GetGameStateForObjectID(ProjectState.ObjectID,, GameState.HistoryIndex - 1));
 
 			NewGameState = class'XComGameStateContext_ChangeContainer'.static.CreateChangeState("FOXCOM PATCH_WOUND_TIMERS" @ UnitState.GetFullName());
@@ -240,13 +215,20 @@ static private function EventListenerReturn OnPostMissionUpdateSoldierHealing(Ob
 			//}
 			//else
 			//{
-			//	ProjectState.BlockPointsRemaining = 0;
-			//	ProjectState.ProjectPointsRemaining = 0;
+				ProjectState.BlockPointsRemaining = 0;
+				ProjectState.ProjectPointsRemaining = 0;
 			//}
 
-			`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Adding" @ int(UV.fValue) @ "days of healing time.");
+			BaseHealingTime = default.BaseHealingTimeDaysPerMissingHP * (UnitState.GetBaseStat(eStat_HP) - UnitState.GetCurrentStat(eStat_HP));
+			
+			UnitState.GetUnitValue(default.WoundTimerValue, UV);
+			ExtraHealingTime = UV.fValue;
 
-			ProjectState.AddRecoveryDays(UV.fValue);
+			TotalHealingTime = Round(BaseHealingTime + ExtraHealingTime);
+
+			`AMLOG("PATCH_WOUND_TIMERS" @ UnitState.GetFullName() @ "Adding base Healing Time:" @ BaseHealingTime @ ", extra Healing Time:" @ ExtraHealingTime @ ", total:" @ TotalHealingTime @ "days.");
+
+			ProjectState.AddRecoveryDays(TotalHealingTime);
 
 			`GAMERULES.SubmitGameState(NewGameState);
 			break;
