@@ -7,7 +7,17 @@ class Help extends Object abstract;
 
 
 
+static final function float GetRandomFloat(const float MinValue, const float MaxValue)
+{
+	return MinValue + `SYNC_FRAND_STATIC() * (MaxValue - MinValue);
+}
 
+static final function float GetRandomInt(const float MinValue, const float MaxValue)
+{
+	return MinValue + `SYNC_RAND_STATIC(MaxValue - MinValue + 1);
+}
+
+// ---------------------------------------------------------------
 
 
 

@@ -7,6 +7,10 @@ PATCH_BLEEDOUT_Tip = "If true, FOXCOM will override bleedout rules with the foll
 PATCH_WOUND_TIMERS_Label = "Patch Wound Timers"
 PATCH_WOUND_TIMERS_Tip = "If true, FOXCOM will override wound recovery times with the following changes: wound recovery depends on how long the unit has spent in combat while wounded and on that wound's severity."
 
+
+STAT_PENALTY_ON_BLEEDOUT_Label = "Permanent stat penalty on bleedout"
+STAT_PENALTY_ON_BLEEDOUT_Tip = "If true, soldiers will receive a permanent, stacking stat penalty to a random stat every time they bleed out."
+
 [WOTCIridarFoxCom_MCMScreen]
 
 ModName = "FOXCOM"
