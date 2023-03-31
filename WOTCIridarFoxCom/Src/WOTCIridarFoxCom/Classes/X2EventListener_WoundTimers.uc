@@ -85,7 +85,8 @@ static private function EventListenerReturn OnPlayerTurnBegun(Object EventData, 
 
 	foreach History.IterateByClassType(class'XComGameState_Unit', UnitState)
     {
-		if (!UnitState.IsInPlay() || UnitState.bRemovedFromPlay || UnitState.IsDead() || !UnitState.IsInjured())
+		// We care about not currently injured, as they might be simply healed up.
+		if (!UnitState.IsInPlay() || UnitState.bRemovedFromPlay || UnitState.IsDead() /*|| !UnitState.IsInjured()*/ ) 
 			continue;
 
 		if (UnitState.ControllingPlayer.ObjectID != PlayerState.ObjectID)
