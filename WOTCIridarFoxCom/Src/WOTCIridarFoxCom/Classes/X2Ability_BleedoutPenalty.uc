@@ -7,10 +7,10 @@ static function array<X2DataTemplate> CreateTemplates()
 	if (!`GetMCMSettingBool("STAT_PENALTY_ON_BLEEDOUT"))
 		return Templates;
 
-	// This will apply the stat changes
+	// This will display the stat changes in the interface in Tactical.
 	Templates.AddItem(IRI_FOXCOM_BleedoutPenalty());
 
-	// This will display the stat changes in the interface
+	// This one is for the armory.
 	Templates.AddItem(IRI_FOXCOM_BleedoutPenalty_Passive());
 
 	return Templates;
@@ -25,15 +25,21 @@ static private function X2AbilityTemplate IRI_FOXCOM_BleedoutPenalty()
 
 	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_standard";
 	Template.AbilitySourceName = 'eAbilitySource_Debuff';
-	SetHidden(Template);
+	
+	// Hide ability everywhere except for Armory summary.
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
+	Template.bDisplayInUITacticalText = false;
+	Template.bDisplayInUITooltip = false;
+	Template.bDontDisplayInAbilitySummary = false;
+	Template.bHideOnClassUnlock = true;
 
 	Template.AbilityToHitCalc = default.DeadEye;
 	Template.AbilityTargetStyle = default.SelfTarget;
 	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
 	
 	BleedoutPenalty = new class'X2Effect_BleedoutPenalty';
-	BleedoutPenalty.BuildPersistentEffect(1, true, false, false, eGameRule_PlayerTurnEnd);
-	BleedoutPenalty.SetDisplayInfo(ePerkBuff_Penalty, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,, Template.AbilitySourceName);
+	BleedoutPenalty.BuildPersistentEffect(1, true, false, false);
+	BleedoutPenalty.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,, Template.AbilitySourceName);
 	Template.AddShooterEffect(BleedoutPenalty);
 
 	Template.bSkipFireAction = true;
@@ -54,17 +60,18 @@ static private function X2AbilityTemplate IRI_FOXCOM_BleedoutPenalty_Passive()
 	Template.IconImage = "img:///UILibrary_PerkIcons.UIPerk_standard";
 	Template.AbilitySourceName = 'eAbilitySource_Debuff';
 	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_NeverShow;
-	Template.Hostility = eHostility_Neutral;
-	Template.bIsPassive = true;
-
+	
+	Template.bDisplayInUITacticalText = false;
 	Template.bDisplayInUITooltip = false;
-	Template.bDontDisplayInAbilitySummary = true;
+	Template.bDontDisplayInAbilitySummary = false;
 	Template.bHideOnClassUnlock = true;
 
 	Template.AbilityToHitCalc = default.DeadEye;
 	Template.AbilityTargetStyle = default.SelfTarget;
-	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
+	Template.AbilityTriggers.AddItem(new class'X2AbilityTrigger_Placeholder');
 
+	Template.bIsPassive = true;
+	Template.Hostility = eHostility_Neutral;
 	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
 
 	return Template;
@@ -74,40 +81,22 @@ static private function X2AbilityTemplate IRI_FOXCOM_BleedoutPenalty_Passive()
 //				X2 DLC Info Methods
 //	========================================
 
-static final function OnPostTemplatesCreated()
-{
-	local X2CharacterTemplateManager	CharMgr;
-	local X2CharacterTemplate			CharTemplate;
-	local X2DataTemplate				DataTemplate;
-
-	if (!`GetMCMSettingBool("STAT_PENALTY_ON_BLEEDOUT"))
-		return;
-
-	CharMgr = class'X2CharacterTemplateManager'.static.GetCharacterTemplateManager();
-
-	foreach CharMgr.IterateTemplates(DataTemplate)
-	{
-		CharTemplate = X2CharacterTemplate(DataTemplate);
-
-		if (CharTemplate == none || !CharTemplate.bIsSoldier)
-			continue;
-
-		CharTemplate.Abilities.AddItem('IRI_FOXCOM_BleedoutPenalty');
-	}
-}
-
 static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> EarnedAbilities, XComGameState_Unit UnitState)
 {
 	local SoldierClassAbilityType NewAbility;
 
-	if (!`GetMCMSettingBool("STAT_PENALTY_ON_BLEEDOUT"))
+	`AMLOG("Running for unit:" @ UnitState.GetFullName());
+
+	if (!`GetMCMSettingBool("STAT_PENALTY_ON_BLEEDOUT") || !UnitState.IsSoldier() || !UnitState.GetMyTemplate().bCanBeCriticallyWounded)
 		return;
-	
-	//if (class'X2Effect_BleedoutPenalty'.static.DoesUnitHaveAnyPenalty(UnitState))
-	//{
-		NewAbility.AbilityName = 'IRI_FOXCOM_BleedoutPenalty_Passive';
+
+	if (`TACTICALRULES != none || class'X2EventListener_BleedoutPenalty'.static.DoesUnitHaveAnyPenalty(UnitState))
+	{
+		`AMLOG("Adding bleedout penalty");
+
+		NewAbility.AbilityName = 'IRI_FOXCOM_BleedoutPenalty';
 		EarnedAbilities.AddItem(NewAbility);
-	//}
+	}
 }
 
 //	========================================

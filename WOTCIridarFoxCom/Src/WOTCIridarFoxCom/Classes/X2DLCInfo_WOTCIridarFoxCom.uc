@@ -7,7 +7,7 @@ static function OnPreCreateTemplates()
 
 static event OnPostTemplatesCreated()
 {
-	class'X2Ability_BleedoutPenalty'.static.OnPostTemplatesCreated();
+	
 }
 
 static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> EarnedAbilities, XComGameState_Unit UnitState)
@@ -17,7 +17,7 @@ static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> 
 
 static function bool AbilityTagExpandHandler_CH(string InString, out string OutString, Object ParseObj, Object StrategyParseOb, XComGameState GameState)
 {
-	return class'X2Effect_BleedoutPenalty'.static.AbilityTagExpandHandler_CH(InString, OutString, ParseObj, StrategyParseOb, GameState);
+	return class'X2EventListener_BleedoutPenalty'.static.AbilityTagExpandHandler_CH(InString, OutString, ParseObj, StrategyParseOb, GameState);
 }
 
 static event InstallNewCampaign(XComGameState StartState)
