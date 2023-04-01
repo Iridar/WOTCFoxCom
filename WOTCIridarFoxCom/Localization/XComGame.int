@@ -1,11 +1,2 @@
-[IRI_FOXCOM_BleedoutPenalty X2AbilityTemplate]
-LocFriendlyName="Lasting Wound"
-LocHelpText="This unit is lasting wound."
-LocLongDescription="This unit is lasting wound: <Ability:IRI_FOXCOM_BleedoutPenalty/>"
-LocFlyOverText="Lasting Wound"
 
-[IRI_FOXCOM_BleedoutPenalty_Passive X2AbilityTemplate]
-LocFriendlyName="Lasting Wound"
-LocHelpText="This unit is lasting wound."
-LocLongDescription="This unit is lasting wound: <Ability:IRI_FOXCOM_BleedoutPenalty/>"
 

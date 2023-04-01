@@ -6,10 +6,13 @@ struct BleedoutPenaltyStruct
 	var int MinValue;
 	var int MaxValue;
 	var int TotalMaxPenalty;
+	var int MinStatValue;
 };
 var private config array<BleedoutPenaltyStruct>	PossibleStatPenalties;	// Default deck
 
 var private name ValueName;
+var private name VizValueName_StatType;
+var private name VizValueName_StatValue;
 
 static function array<X2DataTemplate> CreateTemplates()
 {
@@ -60,12 +63,92 @@ static private function EventListenerReturn OnUnitBleedingOut(Object EventData, 
 	UnitState.SetUnitFloatValue(default.ValueName, UV.fValue + 1, eCleanup_Never);
 
 	if (GeneratePenaltyForUnit(UnitState, NewGameState))
-	{	
-		
-		// TODO: Add visualization
+	{		
+		if (NewGameState.GetContext().PostBuildVisualizationFn.Find(BleedoutPenalty_PostBuildVisualization) == INDEX_NONE)
+		{
+			`AMLOG("Inserting Post Build Vis");
+			NewGameState.GetContext().PostBuildVisualizationFn.AddItem(BleedoutPenalty_PostBuildVisualization);
+		}
 	}
 
 	return ELR_NoInterrupt;
+}
+
+static private function BleedoutPenalty_PostBuildVisualization(XComGameState VisualizeGameState)
+{
+	local VisualizationActionMetadata	ActionMetadata;
+	local X2Action_PlayMessageBanner	BannerAction;
+	local XComGameState_Unit			UnitState;
+	local UnitValue						UV;
+	local XComGameStateHistory			History;
+	local ECharStatType					StatType;
+	local int							StatValue;
+	local XComGameStateVisualizationMgr VisMgr;
+	local array<X2Action>				FindActions;
+	local X2Action						FindAction;
+	local string						strTitle;
+	local string						strUnitName;
+	local string						strMessage;
+
+	`AMLOG("Running");
+
+	VisMgr = `XCOMVISUALIZATIONMGR;
+
+	History = `XCOMHISTORY;
+	foreach VisualizeGameState.IterateByClassType(class'XComGameState_Unit', UnitState)
+	{
+		`AMLOG("Unit:" @ UnitState.GetFullName());
+		if (!UnitState.GetUnitValue(default.VizValueName_StatType, UV))
+			continue;
+
+		StatType = ECharStatType(int(UV.fValue));
+
+		if (!UnitState.GetUnitValue(default.VizValueName_StatValue, UV))
+			continue;
+
+		StatValue = int(UV.fValue);
+
+		
+
+		VisMgr.GetNodesOfType(VisMgr.BuildVisTree, class'X2Action_PlayMessageBanner', FindActions,, UnitState.ObjectID);
+
+		`AMLOG("Penalty:" @ StatType @ StatValue @ "found actions:" @ FindActions.Length);
+
+		foreach FindActions(FindAction)
+		{
+			BannerAction = X2Action_PlayMessageBanner(FindAction);
+			if (BannerAction.BannerMessages.Length == 0)
+				continue;
+
+			//`AMLOG(BannerAction.BannerMessages[0].Message @ "vs" @ class'UIEventNoticesTactical'.default.BleedingTitle);
+			//`AMLOG(BannerAction.BannerMessages[0].IconPath @ "vs" @ "img:UILibrary_PerkIcons.UIPerk_bleeding");
+			//`AMLOG(BannerAction.BannerMessages[0].Value @ "vs" @ class'X2StatusEffects'.default.BleedingEffectAcquiredString);
+			//`AMLOG(BannerAction.BannerMessages[0].eState @ "vs" @ "eUIState_Bad");
+
+			if (BannerAction.BannerMessages[0].Message == class'UIEventNoticesTactical'.default.BleedingOutTitle &&
+				BannerAction.BannerMessages[0].IconPath == "img:///UILibrary_XPACK_Common.WorldMessage" &&
+				BannerAction.BannerMessages[0].eState == eUIState_Bad)
+			{
+				`AMLOG("Altering message");
+				BannerAction.BannerMessages[0].Value @= StatValue @ `GetLocalizedString("max") @ GetStatLabel(StatType) @ `GetLocalizedString("penalty");
+				break;
+			}
+		}
+
+		//ActionMetadata.StateObject_OldState = History.GetGameStateForObjectID(UnitState.ObjectID,, VisualizeGameState.HistoryIndex - 1);
+		//ActionMetadata.StateObject_NewState = UnitState;
+		//ActionMetadata.VisualizeActor = UnitState.GetVisualizer();
+		//
+		//
+		//strTitle = 
+		//strUnitName = UnitState.GetName(eNameType_RankFull);
+		//strMessage
+		//
+		//
+		//
+		//BannerAction = X2Action_PlayMessageBanner(class'X2Action_PlayMessageBanner'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(),,, FindActions));
+		//BannerAction.AddMessageBanner(UnitState.GetFullName() @ "received a permanent stat penalty!", "img:///UILibrary_PerkIcons.UIPerk_willtosurvive", strUnitName, string(StatValue), eUIState_Bad);
+	}
 }
 
 static private function bool GeneratePenaltyForUnit(XComGameState_Unit UnitState, XComGameState NewGameState)
@@ -165,19 +248,24 @@ static private function bool ApplyStatPenalty(XComGameState_Unit UnitState, cons
 	`AMLOG("Base Stat:" @ int(BaseStat) @ "Current Stat:" @ int(CurrentStat) @ "New Base Stat:" @ int(NewBaseStat) @ "NewCurrentStat:" @ int(NewCurrentStat));
 
 	// Make sure we don't reduce any stats below 1.
-	if (NewBaseStat < 1)
+	if (NewBaseStat < Penalty.MinStatValue)
 	{
-		NewBaseStat = 1;
-		NewCurrentStat = 1;
+		NewBaseStat = Penalty.MinStatValue;
+		NewCurrentStat = Penalty.MinStatValue;
+		GeneratedPenaltyValue = NewBaseStat - BaseStat;
 		bReachedMaximumPenalty = true;
 
-		`AMLOG("Reached minimum valuem, setting it to 1 instead.");
+		`AMLOG("Reached minimum value, setting it to:" @ Penalty.MinStatValue @ "instead.");
 	}
 
 	UnitState.SetBaseMaxStat(Penalty.StatType, NewBaseStat);
 	UnitState.SetCurrentStat(Penalty.StatType, NewCurrentStat);
 
 	SetCurrentStatPenalty(UnitState, Penalty.StatType, TotalPenalty);
+
+	// Record the last applied penalty for visualization purposes
+	UnitState.SetUnitFloatValue(default.VizValueName_StatType, int(Penalty.StatType), eCleanup_BeginTurn);
+	UnitState.SetUnitFloatValue(default.VizValueName_StatValue, GeneratedPenaltyValue, eCleanup_BeginTurn);
 
 	return bReachedMaximumPenalty;
 }
@@ -296,4 +384,7 @@ static private function string GetStatLabel(const ECharStatType StatType)
 defaultproperties
 {
 	ValueName = "IRI_FOXCOM_BleedoutPenalty_Value"
+	VizValueName_StatType = "IRI_FOXCOM_BleedoutPenalty_VizValue_Stat"
+	VizValueName_StatValue = "IRI_FOXCOM_BleedoutPenalty_VizValue_Value"
 }
+

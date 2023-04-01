@@ -96,6 +96,9 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\WOTCIridarFoxCom_MCMScreenListener.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2AbilityTemplate_FOXCOM.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2Ability_BleedoutPenalty.uc">
       <SubType>Content</SubType>
     </Content>

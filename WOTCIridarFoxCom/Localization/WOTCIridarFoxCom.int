@@ -10,9 +10,18 @@ PATCH_WOUND_TIMERS_Tip = "If true, FOXCOM will override wound recovery times wit
 
 STAT_PENALTY_ON_BLEEDOUT_Label = "Permanent stat penalty on bleedout"
 STAT_PENALTY_ON_BLEEDOUT_Tip = "If true, soldiers will receive a permanent, stacking stat penalty to a random stat every time they bleed out."
+max = "max"
+penalty = "penalty."
 
 [WOTCIridarFoxCom_MCMScreen]
 
 ModName = "FOXCOM"
 PageTitle = "FOXCOM"
 GroupHeader_Combat = "COMBAT SETTINGS"
+
+
+[IRI_FOXCOM_BleedoutPenalty X2AbilityTemplate_FOXCOM]
+LocFriendlyName="Lasting Wounds"
+LocHelpText="This unit has lasting wounds that cause permanent stat penalties."
+LocLongDescription="This unit's lasting wounds cause permanent stat penalties:<Ability:IRI_FOXCOM_BleedoutPenalty/>"
+LocFlyOverText="Lasting Wound"
