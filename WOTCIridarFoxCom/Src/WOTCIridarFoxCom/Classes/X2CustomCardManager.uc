@@ -426,7 +426,17 @@ static final function X2CustomCardManager GetAndPrepCustomCardManager(XComGameSt
 {
 	local X2CustomCardManager StateObject;
 
-	StateObject = GetCustomCardManager(NewGameState);
+	foreach NewGameState.IterateByClassType(class'X2CustomCardManager', StateObject)
+	{
+		return StateObject;
+	}
+	
+	StateObject = X2CustomCardManager(`XCOMHISTORY.GetSingleGameStateObjectForClass(class'X2CustomCardManager', true));
+	if (StateObject == none)
+	{
+		return X2CustomCardManager(NewGameState.CreateNewStateObject(class'X2CustomCardManager'));
+	}
+
 	StateObject = X2CustomCardManager(NewGameState.ModifyStateObject(StateObject.Class, StateObject.ObjectID));
 
 	return StateObject;

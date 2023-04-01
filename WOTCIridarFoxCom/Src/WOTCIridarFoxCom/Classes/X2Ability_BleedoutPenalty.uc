@@ -32,8 +32,8 @@ static private function X2AbilityTemplate IRI_FOXCOM_BleedoutPenalty()
 	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
 	
 	BleedoutPenalty = new class'X2Effect_BleedoutPenalty';
-	BleedoutPenalty.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnEnd);
-	BleedoutPenalty.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,, Template.AbilitySourceName);
+	BleedoutPenalty.BuildPersistentEffect(1, true, false, false, eGameRule_PlayerTurnEnd);
+	BleedoutPenalty.SetDisplayInfo(ePerkBuff_Penalty, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,, Template.AbilitySourceName);
 	Template.AddShooterEffect(BleedoutPenalty);
 
 	Template.bSkipFireAction = true;
@@ -103,11 +103,11 @@ static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> 
 	if (!`GetMCMSettingBool("STAT_PENALTY_ON_BLEEDOUT"))
 		return;
 	
-	if (class'X2Effect_BleedoutPenalty'.static.DoesUnitHaveAnyPenalty(UnitState))
-	{
+	//if (class'X2Effect_BleedoutPenalty'.static.DoesUnitHaveAnyPenalty(UnitState))
+	//{
 		NewAbility.AbilityName = 'IRI_FOXCOM_BleedoutPenalty_Passive';
 		EarnedAbilities.AddItem(NewAbility);
-	}
+	//}
 }
 
 //	========================================

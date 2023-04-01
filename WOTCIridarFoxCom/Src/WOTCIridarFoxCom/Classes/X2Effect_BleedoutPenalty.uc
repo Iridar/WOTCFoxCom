@@ -48,8 +48,11 @@ function RegisterForEvents(XComGameState_Effect EffectGameState)
 
 static private function EventListenerReturn OnUnitBleedingOut(Object EventData, Object EventSource, XComGameState NewGameState, Name Event, Object CallbackData)
 {
+	local XComGameState_Effect	EffectState;
+	local XComGameState_Effect	NewEffectState;
 	local XComGameState_Unit	UnitState;
 	local UnitValue				UV;
+	local X2Effect_Persistent	EffectTemplate;
 
 	if (!`GetMCMSettingBool("STAT_PENALTY_ON_BLEEDOUT"))
 		return ELR_NoInterrupt;
@@ -67,6 +70,18 @@ static private function EventListenerReturn OnUnitBleedingOut(Object EventData, 
 		// Use the effect name as the name of the unit value for tracking how many times this unit was penalized.
 		UnitState.GetUnitValue(default.EffectName, UV);
 		UnitState.SetUnitFloatValue(default.EffectName, UV.fValue + 1, eCleanup_Never);
+
+		EffectState = XComGameState_Effect(CallbackData);
+		if (EffectState == none)
+			return ELR_NoInterrupt;
+
+		NewEffectState = XComGameState_Effect(NewGameState.GetGameStateForObjectID(EffectState.ObjectID));
+		if (NewEffectState == none)
+			NewEffectState = XComGameState_Effect(NewGameState.ModifyStateObject(EffectState.Class, EffectState.ObjectID));
+
+		//UpdatePenalties(UnitState, NewEffectState);
+		EffectTemplate = NewEffectState.GetX2Effect();
+		EffectTemplate.OnEffectAdded(NewEffectState.ApplyEffectParameters, UnitState, NewGameState, NewEffectState);
 
 		// TODO: Add visualization
 	}
@@ -161,9 +176,11 @@ static private function int GetCurrentStatPenalty(const XComGameState_Unit UnitS
 	local UnitValue UV;
 	local name ValueName;
 
-	ValueName = name(default.EffectName $ StatType);
+	ValueName = name(default.EffectName $ int(StatType));
 
 	UnitState.GetUnitValue(ValueName, UV);
+
+	`AMLOG("Retrieved penalty for unit:" @ ValueName @ StatType @ int(UV.fValue));
 
 	return UV.fValue;
 }
@@ -171,7 +188,9 @@ static private function SetCurrentStatPenalty(XComGameState_Unit NewUnitState, c
 {
 	local name ValueName;
 
-	ValueName = name(default.EffectName $ StatType);
+	ValueName = name(default.EffectName $ int(StatType));
+
+	`AMLOG("Recording penalty for unit:" @ ValueName @ StatType @ PenaltyValue);
 
 	NewUnitState.SetUnitFloatValue(ValueName, PenaltyValue, eCleanup_Never);
 }
@@ -184,7 +203,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 
 	m_aStatChanges.Length = 0;
 
-	`AMLOG("STAT_PENALTY_ON_BLEEDOUT Running for unit 1:" @ UnitState.GetFullName());
+	`AMLOG("STAT_PENALTY_ON_BLEEDOUT Running 1");
 
 	if (!`GetMCMSettingBool("STAT_PENALTY_ON_BLEEDOUT"))
 		return;
@@ -198,7 +217,7 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	foreach PossibleStatPenalties(PossibleStatPenalty)
 	{
 		Change.StatAmount = GetCurrentStatPenalty(UnitState, PossibleStatPenalty.StatType);
-		if (Change.StatAmount > 0)
+		if (Change.StatAmount < 0)
 		{
 			Change.StatType = PossibleStatPenalty.StatType;
 
@@ -210,7 +229,41 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 
 	super.OnEffectAdded(ApplyEffectParameters, kNewTargetState, NewGameState, NewEffectState);
 }
+/*
+static private function UpdatePenalties(XComGameState_Unit UnitState, XComGameState_Effect NewEffectState)
+{	
+	local StatChange			Change;
+	local BleedoutPenaltyStruct PossibleStatPenalty;
 
+	`AMLOG("STAT_PENALTY_ON_BLEEDOUT Running for unit:" @ UnitState.GetFullName());
+
+	NewEffectState.StatChanges.Length = 0;
+
+	foreach default.PossibleStatPenalties(PossibleStatPenalty)
+	{
+		Change.StatAmount = GetCurrentStatPenalty(UnitState, PossibleStatPenalty.StatType);
+		if (Change.StatAmount < 0)
+		{
+			Change.StatType = PossibleStatPenalty.StatType;
+
+			`AMLOG("Adding penalty to stat:" @ Change.StatType $ ", amount:" @ Change.StatAmount);
+
+			NewEffectState.StatChanges.AddItem(Change);
+		}
+	}
+}
+
+*/
+simulated function OnEffectRemoved(const out EffectAppliedData ApplyEffectParameters, XComGameState NewGameState, bool bCleansed, XComGameState_Effect RemovedEffectState)
+{
+	local XComGameState_Unit kOldTargetUnitState;	
+
+	kOldTargetUnitState = XComGameState_Unit(`XCOMHISTORY.GetGameStateForObjectID(ApplyEffectParameters.TargetStateObjectRef.ObjectID));
+
+	`AMLOG("Running for:" @ kOldTargetUnitState.GetFullName());
+
+	super.OnEffectRemoved(ApplyEffectParameters, NewGameState, bCleansed, RemovedEffectState);
+}
 
 static final function bool AbilityTagExpandHandler_CH(string InString, out string OutString, Object ParseObj, Object StrategyParseOb, XComGameState GameState)
 {
@@ -220,9 +273,10 @@ static final function bool AbilityTagExpandHandler_CH(string InString, out strin
 	local BleedoutPenaltyStruct PossibleStatPenalty;
 	local int					PenaltyAmount;
 
-    //  Process only the "ForceAlignment" tag.
     if (InString != "IRI_FOXCOM_BleedoutPenalty")
 		return false;
+
+	`AMLOG("Running");
     
 	UnitState = XComGameState_Unit(StrategyParseOb);
 	if (UnitState == none)
@@ -237,6 +291,7 @@ static final function bool AbilityTagExpandHandler_CH(string InString, out strin
 			}
 			else
 			{
+				`AMLOG("No face, no name, no number");
 				return true;
 			}
 		}
@@ -246,12 +301,16 @@ static final function bool AbilityTagExpandHandler_CH(string InString, out strin
 		}
 	}
 	if (UnitState == none)
+	{
+		`AMLOG("Failed to acquire unit state.");
 		return true;
+	}
 
+	`AMLOG("Unit:" @ UnitState.GetFullName());
 	foreach default.PossibleStatPenalties(PossibleStatPenalty)
 	{
 		PenaltyAmount = GetCurrentStatPenalty(UnitState, PossibleStatPenalty.StatType);
-		if (PenaltyAmount > 0)
+		if (PenaltyAmount < 0)
 		{
 			OutString $= "\n * " $ GetStatLabel(PossibleStatPenalty.StatType) $": " $ PenaltyAmount;
 		}
