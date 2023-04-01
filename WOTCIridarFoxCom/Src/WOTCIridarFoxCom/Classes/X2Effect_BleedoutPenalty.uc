@@ -1,10 +1,13 @@
 class X2Effect_BleedoutPenalty extends X2Effect_PersistentStatChange config(BleedoutPenalty);
 
-var private config array<ECharStatType>	PossibleStatPenalties;	// Default deck
-
-var private config array<int>			MaxTotalStatPenalty;
-var private config array<int>			MinPenaltyValue;
-var private config array<int>			MaxPenaltyValue;
+struct BleedoutPenaltyStruct
+{
+	var ECharStatType StatType;
+	var int MinValue;
+	var int MaxValue;
+	var int TotalMaxPenalty;
+};
+var private config array<BleedoutPenaltyStruct>	PossibleStatPenalties;	// Default deck
 
 function RegisterForEvents(XComGameState_Effect EffectGameState)
 {
@@ -91,8 +94,7 @@ static private function bool GeneratePenaltyForUnit(XComGameState_Unit UnitState
 	local ECharStatType			StatType;
 	local string				DrawnCard;
 	local int					GeneratedPenaltyValue;
-	local int					MinValue;
-	local int					MaxValue;
+	local BleedoutPenaltyStruct BleedoutPenalty;
 
 	`AMLOG("STAT_PENALTY_ON_BLEEDOUT Running for:" @ UnitState.GetFullName());
 
@@ -103,10 +105,10 @@ static private function bool GeneratePenaltyForUnit(XComGameState_Unit UnitState
 	if (!CardMgr.DoesDeckExist(DeckName))
 	{
 		`AMLOG("First time bleedout - generating deck:" @ DeckName);
-		foreach default.PossibleStatPenalties(StatType)
+		foreach default.PossibleStatPenalties(BleedoutPenalty)
 		{
 			// Double conversion to store as int, otherwise the enum gets stored as a string and cannot be easily converted back.
-			CardMgr.AddCardToDeck(DeckName, string(int(StatType))); 
+			CardMgr.AddCardToDeck(DeckName, string(int(BleedoutPenalty.StatType))); 
 		}
 	}
 
@@ -121,33 +123,38 @@ static private function bool GeneratePenaltyForUnit(XComGameState_Unit UnitState
 
 	StatType = ECharStatType(int(DrawnCard));
 
-	// [x; y] randomization
-	MinValue = default.MinPenaltyValue[StatType];
-	MaxValue = default.MaxPenaltyValue[StatType];
-	if (MinValue == MaxValue)
+	foreach default.PossibleStatPenalties(BleedoutPenalty)
 	{
-		GeneratedPenaltyValue = MinValue;
+		if (BleedoutPenalty.StatType != StatType)
+			continue;
+
+		if (BleedoutPenalty.MinValue == BleedoutPenalty.MaxValue)
+		{
+			GeneratedPenaltyValue = BleedoutPenalty.MinValue;
+		}
+		else
+		{
+			GeneratedPenaltyValue = -class'Help'.static.GetRandomInt(-BleedoutPenalty.MinValue, -BleedoutPenalty.MaxValue);
+		}
+
+		GeneratedPenaltyValue += GetCurrentStatPenalty(UnitState, StatType);
+
+		if (GeneratedPenaltyValue <= BleedoutPenalty.TotalMaxPenalty)
+		{
+			GeneratedPenaltyValue = BleedoutPenalty.TotalMaxPenalty;
+
+			// If this penalty is at maximum, remove it from the deck so it cannot be drawn again.
+			`AMLOG("This penalty is at maximum, removing card from deck.");
+			CardMgr.RemoveCardFromDeck(DeckName, DrawnCard);
+		}
+
+		`AMLOG("Selected stat to penalyze:" @ StatType @ "Generated penalty:" @ GeneratedPenaltyValue @ "out of:" @ BleedoutPenalty.MinValue @ "-" @ BleedoutPenalty.MaxValue);
+
+		SetCurrentStatPenalty(UnitState, StatType, GeneratedPenaltyValue);
+		break;
 	}
-	else
-	{
-		// Put minuses everywhere cuz int rand don't like no negative numbers
-		GeneratedPenaltyValue = -class'Help'.static.GetRandomInt(-MinValue, -MaxValue);
-	}
-
-	`AMLOG("Selected stat to penalyze:" @ StatType @ "Generated penalty:" @ GeneratedPenaltyValue @ "out of:" @ MinValue @ "-" @ MaxValue);
-
-	// If this penalty is at maximum, remove it from the deck so it cannot be drawn again.
-	if (SetCurrentStatPenalty(UnitState, StatType, GeneratedPenaltyValue))
-	{
-		`AMLOG("This penalty is at maximum, removing card from deck.");
-
-		CardMgr.RemoveCardFromDeck(DeckName, DrawnCard);
-	}
-
 	return true;
 }
-
-
 
 static private function int GetCurrentStatPenalty(const XComGameState_Unit UnitState, const ECharStatType StatType)
 {
@@ -160,34 +167,24 @@ static private function int GetCurrentStatPenalty(const XComGameState_Unit UnitS
 
 	return UV.fValue;
 }
-
-static private function bool SetCurrentStatPenalty(XComGameState_Unit NewUnitState, const ECharStatType StatType, int PenaltyValue)
+static private function SetCurrentStatPenalty(XComGameState_Unit NewUnitState, const ECharStatType StatType, int PenaltyValue)
 {
 	local name ValueName;
-	local bool bPenaltyReachedMaximum;
 
 	ValueName = name(default.EffectName $ StatType);
 
-	PenaltyValue += GetCurrentStatPenalty(NewUnitState, StatType);
-
-	if (PenaltyValue <= default.MaxTotalStatPenalty[StatType])
-	{
-		PenaltyValue = default.MaxTotalStatPenalty[StatType];
-		bPenaltyReachedMaximum = true;
-	}
-
 	NewUnitState.SetUnitFloatValue(ValueName, PenaltyValue, eCleanup_Never);
-
-	return bPenaltyReachedMaximum;
 }
 
 simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffectParameters, XComGameState_BaseObject kNewTargetState, XComGameState NewGameState, XComGameState_Effect NewEffectState)
 {
 	local StatChange			Change;
-	local ECharStatType			PossibleStatPenalty;
+	local BleedoutPenaltyStruct PossibleStatPenalty;
 	local XComGameState_Unit	UnitState;
 
 	m_aStatChanges.Length = 0;
+
+	`AMLOG("STAT_PENALTY_ON_BLEEDOUT Running for unit 1:" @ UnitState.GetFullName());
 
 	if (!`GetMCMSettingBool("STAT_PENALTY_ON_BLEEDOUT"))
 		return;
@@ -196,14 +193,14 @@ simulated protected function OnEffectAdded(const out EffectAppliedData ApplyEffe
 	if (UnitState == none)
 		return;
 
-	`AMLOG("STAT_PENALTY_ON_BLEEDOUT Running for unit:" @ UnitState.GetFullName());
+	`AMLOG("STAT_PENALTY_ON_BLEEDOUT Running for unit 2:" @ UnitState.GetFullName());
 
 	foreach PossibleStatPenalties(PossibleStatPenalty)
 	{
-		Change.StatAmount = GetCurrentStatPenalty(UnitState, PossibleStatPenalty);
+		Change.StatAmount = GetCurrentStatPenalty(UnitState, PossibleStatPenalty.StatType);
 		if (Change.StatAmount > 0)
 		{
-			Change.StatType = PossibleStatPenalty;
+			Change.StatType = PossibleStatPenalty.StatType;
 
 			`AMLOG("Adding penalty to stat:" @ Change.StatType $ ", amount:" @ Change.StatAmount);
 
@@ -220,7 +217,7 @@ static final function bool AbilityTagExpandHandler_CH(string InString, out strin
     local XComGameState_Effect	EffectState;
     local XComGameState_Ability	AbilityState;
     local XComGameState_Unit	UnitState;
-	local ECharStatType			PossibleStatPenalty;
+	local BleedoutPenaltyStruct PossibleStatPenalty;
 	local int					PenaltyAmount;
 
     //  Process only the "ForceAlignment" tag.
@@ -253,10 +250,10 @@ static final function bool AbilityTagExpandHandler_CH(string InString, out strin
 
 	foreach default.PossibleStatPenalties(PossibleStatPenalty)
 	{
-		PenaltyAmount = GetCurrentStatPenalty(UnitState, PossibleStatPenalty);
+		PenaltyAmount = GetCurrentStatPenalty(UnitState, PossibleStatPenalty.StatType);
 		if (PenaltyAmount > 0)
 		{
-			OutString $= "\n * " $ GetStatLabel $": " $ PenaltyAmount;
+			OutString $= "\n * " $ GetStatLabel(PossibleStatPenalty.StatType) $": " $ PenaltyAmount;
 		}
 	}
 

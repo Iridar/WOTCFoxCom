@@ -32,7 +32,7 @@ static private function X2AbilityTemplate IRI_FOXCOM_BleedoutPenalty()
 	Template.AbilityTriggers.AddItem(default.UnitPostBeginPlayTrigger);
 	
 	BleedoutPenalty = new class'X2Effect_BleedoutPenalty';
-	BleedoutPenalty.BuildPersistentEffect(1, true, false, false);
+	BleedoutPenalty.BuildPersistentEffect(1, false, false, false, eGameRule_PlayerTurnEnd);
 	BleedoutPenalty.SetDisplayInfo(ePerkBuff_Passive, Template.LocFriendlyName, Template.LocLongDescription, Template.IconImage, true,, Template.AbilitySourceName);
 	Template.AddShooterEffect(BleedoutPenalty);
 
