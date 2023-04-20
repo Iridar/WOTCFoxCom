@@ -12,6 +12,7 @@
   <ItemGroup>
     <Folder Include="Config\" />
     <Folder Include="Config\Base\" />
+    <Folder Include="Config\CoverChanges" />
     <Folder Include="Localization\" />
     <Folder Include="Src\" />
     <Folder Include="Content\" />
@@ -22,6 +23,9 @@
     <Folder Include="Src\WOTCIridarFoxCom\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\CoverChanges\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\XComBleedoutPenalty.ini">
       <SubType>Content</SubType>
     </Content>
