@@ -59,6 +59,7 @@ static private function EventListenerReturn OnUnitBleedingOut(Object EventData, 
 		return ELR_NoInterrupt;
 
 	// Store the number of how many times this unit has received a penalty.
+	// Might be used in UI later.
 	UnitState.GetUnitValue(default.ValueName, UV);
 	UnitState.SetUnitFloatValue(default.ValueName, UV.fValue + 1, eCleanup_Never);
 
@@ -74,21 +75,18 @@ static private function EventListenerReturn OnUnitBleedingOut(Object EventData, 
 	return ELR_NoInterrupt;
 }
 
+// Find the "this unit is bleeding out" banner and patch in additional text into it.
 static private function BleedoutPenalty_PostBuildVisualization(XComGameState VisualizeGameState)
 {
-	local VisualizationActionMetadata	ActionMetadata;
+	local XComGameStateHistory			History;
 	local X2Action_PlayMessageBanner	BannerAction;
 	local XComGameState_Unit			UnitState;
 	local UnitValue						UV;
-	local XComGameStateHistory			History;
 	local ECharStatType					StatType;
 	local int							StatValue;
 	local XComGameStateVisualizationMgr VisMgr;
 	local array<X2Action>				FindActions;
 	local X2Action						FindAction;
-	local string						strTitle;
-	local string						strUnitName;
-	local string						strMessage;
 
 	`AMLOG("Running");
 
@@ -107,8 +105,6 @@ static private function BleedoutPenalty_PostBuildVisualization(XComGameState Vis
 			continue;
 
 		StatValue = int(UV.fValue);
-
-		
 
 		VisMgr.GetNodesOfType(VisMgr.BuildVisTree, class'X2Action_PlayMessageBanner', FindActions,, UnitState.ObjectID);
 
@@ -134,20 +130,6 @@ static private function BleedoutPenalty_PostBuildVisualization(XComGameState Vis
 				break;
 			}
 		}
-
-		//ActionMetadata.StateObject_OldState = History.GetGameStateForObjectID(UnitState.ObjectID,, VisualizeGameState.HistoryIndex - 1);
-		//ActionMetadata.StateObject_NewState = UnitState;
-		//ActionMetadata.VisualizeActor = UnitState.GetVisualizer();
-		//
-		//
-		//strTitle = 
-		//strUnitName = UnitState.GetName(eNameType_RankFull);
-		//strMessage
-		//
-		//
-		//
-		//BannerAction = X2Action_PlayMessageBanner(class'X2Action_PlayMessageBanner'.static.AddToVisualizationTree(ActionMetadata, VisualizeGameState.GetContext(),,, FindActions));
-		//BannerAction.AddMessageBanner(UnitState.GetFullName() @ "received a permanent stat penalty!", "img:///UILibrary_PerkIcons.UIPerk_willtosurvive", strUnitName, string(StatValue), eUIState_Bad);
 	}
 }
 
