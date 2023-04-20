@@ -121,13 +121,7 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_BleedoutPenalty.uc">
       <SubType>Content</SubType>
     </Content>
-    <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_CustomItemState.uc">
-      <SubType>Content</SubType>
-    </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_WoundTimers.uc">
-      <SubType>Content</SubType>
-    </Content>
-    <Content Include="Src\WOTCIridarFoxCom\Classes\XComGameState_Item_FOXCOM.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

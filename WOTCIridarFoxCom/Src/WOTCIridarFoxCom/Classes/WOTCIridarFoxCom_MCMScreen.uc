@@ -2,12 +2,11 @@ class WOTCIridarFoxCom_MCMScreen extends Object config(WOTCIridarFoxCom);
 
 var config int VERSION_CFG;
 
-var private localized string ModName;
-var private localized string PageTitle;
-var private localized string GroupHeader_Combat;
-var private localized string GroupHeader_Weapons;
+var localized string ModName;
+var localized string PageTitle;
+var localized string GroupHeader_Combat;
 
-var private config array<MCMSettingStruct> MCMSettings;
+var config array<MCMSettingStruct> MCMSettings;
 
 `include(WOTCIridarFoxCom\Src\ModConfigMenuAPI\MCM_API_Includes.uci)
 
@@ -40,11 +39,8 @@ simulated function ClientModCallback(MCM_API_Instance ConfigAPI, int GameMode)
 	Page.EnableResetButton(ResetButtonClicked);
 
 	Group = Page.AddGroup('Group_Combat', GroupHeader_Combat);
-	FillMCMGroup(Group);
 
-	Group = Page.AddGroup('Group_Weapons', GroupHeader_Weapons);
 	FillMCMGroup(Group);
-	
 
 
 	Page.ShowSettings();
