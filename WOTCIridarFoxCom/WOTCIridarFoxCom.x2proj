@@ -13,6 +13,9 @@
     <Folder Include="Config\" />
     <Folder Include="Config\Base\" />
     <Folder Include="Config\CoverChanges" />
+    <Folder Include="Config\WeaponChanges" />
+    <Folder Include="Config\SoldierClasses" />
+    <Folder Include="Config\SoldierClasses\Specialist" />
     <Folder Include="Localization\" />
     <Folder Include="Src\" />
     <Folder Include="Content\" />
@@ -23,7 +26,13 @@
     <Folder Include="Src\WOTCIridarFoxCom\Classes\" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Config\CoverChanges\XComFox.ini">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Config\CoverChanges\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\SoldierClasses\Specialist\XComClassData.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComBleedoutPenalty.ini">
@@ -91,6 +100,9 @@
     <Content Include="Src\ModConfigMenuAPI\MCM_API_Includes.uci">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\Foxcom.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\WOTCIridarFoxCom_Defaults.uc">
       <SubType>Content</SubType>
     </Content>
@@ -103,7 +115,13 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2AbilityTemplate_FOXCOM.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2AbilityToHitCalc_StandardAim_Override.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2Ability_BleedoutPenalty.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2Ability_Foxcom.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2CustomCardManager.uc">
@@ -122,6 +140,15 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_WoundTimers.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2WeaponStats.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2WeaponStatsTemplate.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2WeaponStatsTemplateManager.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

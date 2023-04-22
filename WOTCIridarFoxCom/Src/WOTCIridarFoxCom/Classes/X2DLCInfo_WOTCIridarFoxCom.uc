@@ -7,7 +7,7 @@ static function OnPreCreateTemplates()
 
 static event OnPostTemplatesCreated()
 {
-	
+	class'X2WeaponStatsTemplate'.static.PatchWeaponTemplates();
 }
 
 static function ModifyEarnedSoldierAbilities(out array<SoldierClassAbilityType> EarnedAbilities, XComGameState_Unit UnitState)

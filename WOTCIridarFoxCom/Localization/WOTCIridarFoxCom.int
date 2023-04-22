@@ -13,6 +13,10 @@ STAT_PENALTY_ON_BLEEDOUT_Tip = "If true, soldiers will receive a permanent, stac
 max = "max"
 penalty = "penalty."
 
+HighCover_DamageReduction_StatLabel = "High Cover Damage Reduction"
+LowCover_DamageReduction_StatLabel = "Low Cover Damage Reduction"
+ReactionFirePenalty_StatLabel = "Reaction Fire Penalty"
+
 [WOTCIridarFoxCom_MCMScreen]
 
 ModName = "FOXCOM"

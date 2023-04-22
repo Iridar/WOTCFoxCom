@@ -17,3 +17,5 @@
 
 
 `define GetMCMSettingBool(VarName) class'WOTCIridarFoxCom_MCMScreen'.static.GetMCMSettingBool(`VarName)
+
+`define GetWeaponStats(VarName) class'X2WeaponStatsTemplateManager'.static.GetWeaponStatsTemplateManager().FindWeaponStatsTemplate(`VarName)

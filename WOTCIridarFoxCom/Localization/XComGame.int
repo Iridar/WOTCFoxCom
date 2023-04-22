@@ -1,2 +1,18 @@
+[IRI_FM_IgnoreCoverDefense X2AbilityTemplate]
+LocFriendlyName="Accuracy By Volume"
+LocLongDescription="When engaging targets in cover, this weapon ignores the Defense bonuses from cover, but deals reduced damage."
+LocHelpText="When engaging targets in cover, this weapon ignores the Defense bonuses from cover, but deals reduced damage."
+LocPromotionPopupText=""
 
 
+[IRI_ArtilleryCannon_MG_Schematic X2SchematicTemplate]
+m_strClassLabel="SPARK"
+
+[IRI_ArtilleryCannon_CG_Schematic X2SchematicTemplate]
+m_strClassLabel="SPARK"
+
+[IRI_ArtilleryCannon_LS_Schematic X2SchematicTemplate]
+m_strClassLabel="SPARK"
+
+[IRI_ArtilleryCannon_BM_Schematic X2SchematicTemplate]
+m_strClassLabel="SPARK"
