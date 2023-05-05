@@ -16,7 +16,7 @@
     <Folder Include="Config\WeaponChanges" />
     <Folder Include="Config\SoldierClasses" />
     <Folder Include="Config\SoldierClasses\Specialist" />
-	<Folder Include="Config\" />
+    <Folder Include="Config\" />
     <Folder Include="Config\WeaponChanges\0Base" />
     <Folder Include="Config\WeaponChanges\1AllWeapons" />
     <Folder Include="Config\WeaponChanges\2StrategyBalance" />
@@ -49,6 +49,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Config\CoverChanges\XComFox.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\CoverChanges\XComGameCore.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\CoverChanges\XComTemplateEditor.ini">
