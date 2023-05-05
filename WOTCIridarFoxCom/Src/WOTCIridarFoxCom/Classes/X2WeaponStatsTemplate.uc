@@ -52,7 +52,7 @@ static final function PatchWeaponTemplates()
 		}
 		if (StatsTemplate.fReactionFirePenalty != 0)
 		{
-			ReactionFireMarkup.StatModifier = int((1.0f - StatsTemplate.fReactionFirePenalty) * 100.0f);
+			ReactionFireMarkup.StatModifier = int(StatsTemplate.fReactionFirePenalty * 100.0f);
 			WeaponTemplate.UIStatMarkups.AddItem(ReactionFireMarkup);
 		}
 
