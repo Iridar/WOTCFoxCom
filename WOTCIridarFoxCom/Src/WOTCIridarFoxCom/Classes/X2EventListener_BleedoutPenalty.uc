@@ -76,25 +76,19 @@ static private function EventListenerReturn OnUnitBleedingOut(Object EventData, 
 
 static private function BleedoutPenalty_PostBuildVisualization(XComGameState VisualizeGameState)
 {
-	local VisualizationActionMetadata	ActionMetadata;
 	local X2Action_PlayMessageBanner	BannerAction;
 	local XComGameState_Unit			UnitState;
 	local UnitValue						UV;
-	local XComGameStateHistory			History;
 	local ECharStatType					StatType;
 	local int							StatValue;
 	local XComGameStateVisualizationMgr VisMgr;
 	local array<X2Action>				FindActions;
 	local X2Action						FindAction;
-	local string						strTitle;
-	local string						strUnitName;
-	local string						strMessage;
 
 	`AMLOG("Running");
 
 	VisMgr = `XCOMVISUALIZATIONMGR;
 
-	History = `XCOMHISTORY;
 	foreach VisualizeGameState.IterateByClassType(class'XComGameState_Unit', UnitState)
 	{
 		`AMLOG("Unit:" @ UnitState.GetFullName());
