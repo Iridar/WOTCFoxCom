@@ -16,6 +16,28 @@
     <Folder Include="Config\WeaponChanges" />
     <Folder Include="Config\SoldierClasses" />
     <Folder Include="Config\SoldierClasses\Specialist" />
+	<Folder Include="Config\" />
+    <Folder Include="Config\WeaponChanges\0Base" />
+    <Folder Include="Config\WeaponChanges\1AllWeapons" />
+    <Folder Include="Config\WeaponChanges\2StrategyBalance" />
+    <Folder Include="Config\WeaponChanges\3Pistol" />
+    <Folder Include="Config\WeaponChanges\3Autopistol" />
+    <Folder Include="Config\WeaponChanges\3Sword" />
+    <Folder Include="Config\WeaponChanges\3VektorRifle" />
+    <Folder Include="Config\WeaponChanges\2WeaponTiers" />
+    <Folder Include="Config\WeaponChanges\3CombatKnife" />
+    <Folder Include="Config\WeaponChanges\3SawedOffShotgun" />
+    <Folder Include="Config\WeaponChanges\3SMG" />
+    <Folder Include="Config\WeaponChanges\3Bullpup" />
+    <Folder Include="Config\WeaponChanges\3Shotgun" />
+    <Folder Include="Config\WeaponChanges\3AssaultRifle" />
+    <Folder Include="Config\WeaponChanges\3SniperRifle" />
+    <Folder Include="Config\WeaponChanges\3Cannon" />
+    <Folder Include="Config\WeaponChanges\3SparkRifle" />
+    <Folder Include="Config\WeaponChanges\3SparkHeavyCannon" />
+    <Folder Include="Config\WeaponChanges\3Ripjack" />
+    <Folder Include="Config\WeaponChanges\4FinalAdjustments" />
+    <Folder Include="Config\WeaponChanges\3HunterRifle" />
     <Folder Include="Localization\" />
     <Folder Include="Src\" />
     <Folder Include="Content\" />
@@ -152,6 +174,72 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\WeaponChanges\0Base\XComGameData.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\0Base\XComUI.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\1AllWeapons\XComTemplateCreator.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\1AllWeapons\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\2StrategyBalance\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\2WeaponTiers\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3AssaultRifle\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3Autopistol\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3Bullpup\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3Cannon\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3CombatKnife\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3HunterRifle\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3Pistol\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3Ripjack\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3SawedOffShotgun\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3Shotgun\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3SMG\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3SniperRifle\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3SparkHeavyCannon\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3SparkRifle\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3Sword\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\3VektorRifle\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\WeaponChanges\4FinalAdjustments\XComTemplateEditor.ini">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>
