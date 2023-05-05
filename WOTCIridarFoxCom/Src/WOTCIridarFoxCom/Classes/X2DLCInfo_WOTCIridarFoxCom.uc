@@ -7,6 +7,7 @@ static function OnPreCreateTemplates()
 
 static event OnPostTemplatesCreated()
 {
+	class'X2AbilityToHitCalc_StandardAim_Override'.static.PatchAbilityTemplates();
 	class'X2WeaponStatsTemplate'.static.PatchWeaponTemplates();
 }
 

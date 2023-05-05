@@ -151,6 +151,9 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2WeaponStatsTemplateManager.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Config\WeaponChanges\0Base\XComGameData.ini">
+      <SubType>Content</SubType>
+    </Content>
   </ItemGroup>
   <PropertyGroup>
     <SolutionRoot>$(MSBuildProjectDirectory)\..\</SolutionRoot>
