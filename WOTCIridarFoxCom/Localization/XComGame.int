@@ -4,6 +4,13 @@ LocLongDescription="When engaging targets in cover, this weapon ignores the Defe
 LocHelpText="When engaging targets in cover, this weapon ignores the Defense bonuses from cover, but deals reduced damage."
 LocPromotionPopupText=""
 
+[IRI_FM_WeakpointShot X2AbilityTemplate]
+LocFriendlyName="Weakpoint Shot"
+LocLongDescription="Attack the target's weakpoint for massive damage."
+LocHelpText="Attack the target's weakpoint for massive damage."
+LocPromotionPopupText=""
+
+
 
 [IRI_ArtilleryCannon_MG_Schematic X2SchematicTemplate]
 m_strClassLabel="SPARK"

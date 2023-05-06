@@ -17,6 +17,7 @@ $builder = [BuildProject]::new("WOTCIridarFoxCom", $srcDirectory, $sdkPath, $gam
 
 # Uncomment the next line to enable building against Highlander.
 $builder.IncludeSrc("$srcDirectory\X2WOTCCommunityHighlander\X2WOTCCommunityHighlander\Src")
+$builder.IncludeSrc("$srcDirectory\CustomSrc")
 
 switch ($config)
 {

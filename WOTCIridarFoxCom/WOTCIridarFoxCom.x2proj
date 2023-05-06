@@ -167,6 +167,9 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_WoundTimers.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2TargetingMethod_Weakpoint.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2WeaponStats.uc">
       <SubType>Content</SubType>
     </Content>

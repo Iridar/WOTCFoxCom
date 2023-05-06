@@ -5,10 +5,26 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> Templates;
 
 	//Templates.AddItem(IRI_FM_OverwatchShot());
+	Templates.AddItem(IRI_FM_WeakpointShot());
 	Templates.AddItem(IRI_FM_IgnoreCoverDefense());
 
 	return Templates;
 }
+
+static function X2AbilityTemplate IRI_FM_WeakpointShot()
+{
+	local X2AbilityTemplate Template;	
+
+	Template = class'X2Ability_WeaponCommon'.static.Add_StandardShot('IRI_FM_WeakpointShot');
+
+	Template.TargetingMethod = class'X2TargetingMethod_Weakpoint';
+
+	return Template;
+}
+
+
+
+
 /*
 static function X2AbilityTemplate IRI_FM_OverwatchShot()
 {

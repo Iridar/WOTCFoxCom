@@ -1687,4 +1687,7 @@ static final function PatchAbilityTemplates()
 			AbilityTemplate.AbilityToHitCalc = NewCalc;
 		}
 	}
+
+	AbilityTemplate = AbilityMgr.FindAbilityTemplate('StandardShot');
+	AbilityTemplate.AdditionalAbilities.AddItem('IRI_FM_WeakpointShot');
 }
