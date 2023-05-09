@@ -1,9 +1,30 @@
 class X2TargetingMethod_Weakpoint extends X2TargetingMethod_OverTheShoulder;
 
+var private XComPresentationLayer Pres;
+var private UITacticalHUD TacticalHud;
+
+function Init(AvailableAction InAction, int NewTargetIndex)
+{
+	super.Init(InAction, NewTargetIndex);
+
+	Pres = `PRES;
+	TacticalHud = Pres.GetTacticalHUD();
+
+		`AMLOG("Nuking ability HUD:" @ TacticalHud != none @ TacticalHud.m_kAbilityHUD.m_arrAbilities.Length @ TacticalHud.m_kAbilityHUD.m_arrUIAbilities.Length);
+	
+	//TacticalHud.m_kAbilityHUD.m_arrAbilities.Length = 0;
+	//TacticalHud.m_kAbilityHUD.m_arrUIAbilities.Length = 0;
+}
+
+// OnInit: display flags for all weakpoints for this unit
+
+// Hitting TAB cycles through weakpoints
+
+// confirm target: give the main unit state object ID, but store which weakpoint was selected
+
+
 function DirectSetTarget(int TargetIndex)
 {
-	local XComPresentationLayer Pres;
-	local UITacticalHUD TacticalHud;
 	local Actor NewTargetActor;
 	local bool ShouldUseMidpointCamera;
 	local array<TTile> Tiles;
@@ -13,7 +34,6 @@ function DirectSetTarget(int TargetIndex)
 	local XComWorldData World;
 	local array<Actor> CurrentlyMarkedTargets;
 
-	Pres = `PRES;
 	World = `XWORLD;
 	
 	NotifyTargetTargeted(false);
@@ -31,7 +51,6 @@ function DirectSetTarget(int TargetIndex)
 	AddWeakpointTargetingCamera(NewTargetActor, ShouldUseMidpointCamera);
 
 	// put the targeting reticle on the new target
-	TacticalHud = Pres.GetTacticalHUD();
 	TacticalHud.TargetEnemy(GetTargetedObjectID());
 
 
@@ -161,3 +180,43 @@ private function AddWeakpointTargetingCamera(Actor NewTargetActor, bool ShouldUs
 		OTSCamera.SetTarget(NewTargetActor);
 	}
 }
+
+
+final function bool GetWeakpointLocation(out vector Location)
+{
+	local XGUnit TargetedUnit;
+	local XComUnitPawn UnitPawn;
+
+	TargetedUnit = XGUnit(GetTargetedActor());
+	if (TargetedUnit == none)
+	{
+		`AMLOG("Target not a unit.");
+		return false;
+	}
+
+	UnitPawn = TargetedUnit.GetPawn();
+	if (UnitPawn == none)
+	{
+		`AMLOG("No target pawn.");
+		return false;
+	}
+
+	if (UnitPawn.Mesh.GetSocketWorldLocationAndRotation('CIN_Root', Location))
+	{
+		`AMLOG("Got the following coordinates for CIN_Root:" @ Location.X  @ Location.Y @ Location.Z);
+		return true;
+	}
+	return false;
+}
+/*
+function Canceled()
+{
+	super.Canceled();
+	TacticalHud.m_kAbilityHUD.Show();
+}
+
+function Committed()
+{
+	super.Committed();
+	TacticalHud.m_kAbilityHUD.Show();
+}*/

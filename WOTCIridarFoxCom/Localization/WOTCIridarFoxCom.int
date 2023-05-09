@@ -29,3 +29,14 @@ LocFriendlyName="Lasting Wounds"
 LocHelpText="This unit has lasting wounds that cause permanent stat penalties."
 LocLongDescription="This unit's lasting wounds cause permanent stat penalties:<Ability:IRI_FOXCOM_BleedoutPenalty/>"
 LocFlyOverText="Lasting Wound"
+
+
+
+[IRI_FM_AdvTrooperM3_Weakpoint_Head X2WeakpointTemplate]
+strCharacterName="Headshot"
+
+[IRI_FM_AdvTrooperM3_Weakpoint_Balaten X2WeakpointTemplate]
+strCharacterName="Balaten"
+
+[IRI_FM_AdvTrooperM3_Weakpoint_Gun X2WeakpointTemplate]
+strCharacterName="ADVENT Rifle"

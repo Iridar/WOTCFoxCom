@@ -10,6 +10,20 @@ LocLongDescription="Attack the target's weakpoint for massive damage."
 LocHelpText="Attack the target's weakpoint for massive damage."
 LocPromotionPopupText=""
 
+[IRI_FM_WeakpointTargeting_Enable X2AbilityTemplate]
+LocFriendlyName="Toggle Weakpoint Targeting"
+LocLongDescription="Enable."
+LocHelpText="Enable."
+LocPromotionPopupText=""
+LocFlyOverText = "Enabled"
+
+[IRI_FM_WeakpointTargeting_Disable X2AbilityTemplate]
+LocFriendlyName="Toggle Weakpoint Targeting"
+LocLongDescription="Disable."
+LocHelpText="Disable."
+LocPromotionPopupText=""
+LocFlyOverText = "Disabled"
+
 
 
 [IRI_ArtilleryCannon_MG_Schematic X2SchematicTemplate]

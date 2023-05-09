@@ -13,6 +13,7 @@
     <Folder Include="Config\" />
     <Folder Include="Config\Base\" />
     <Folder Include="Config\CoverChanges" />
+    <Folder Include="Config\Weakpoints" />
     <Folder Include="Config\WeaponChanges" />
     <Folder Include="Config\SoldierClasses" />
     <Folder Include="Config\SoldierClasses\Specialist" />
@@ -58,6 +59,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\SoldierClasses\Specialist\XComClassData.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Config\Weakpoints\XComGameData_CharacterStats.ini">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\XComBleedoutPenalty.ini">
@@ -128,6 +132,15 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\Foxcom.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\UITacticalHUD_Enemies_Override.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\UITacticalHUD_Override.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\UITargetingReticle_Override.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\WOTCIridarFoxCom_Defaults.uc">
       <SubType>Content</SubType>
     </Content>
@@ -149,6 +162,15 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2Ability_Foxcom.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2Action_BeginStandardShotTargeting.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2Character_Weakpoints.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2Condition_WeakpointTargeting.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2CustomCardManager.uc">
       <SubType>Content</SubType>
     </Content>
@@ -156,6 +178,9 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\Help.uc" />
     <Content Include="Src\WOTCIridarFoxCom\Classes\ConfigEngine.uc" />
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2Effect_BleedoutPenalty.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2Effect_ClearUnitValue.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2EventListener_Bleedout.uc">
@@ -168,6 +193,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2TargetingMethod_Weakpoint.uc">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2WeakpointTemplate.uc">
       <SubType>Content</SubType>
     </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2WeaponStats.uc">

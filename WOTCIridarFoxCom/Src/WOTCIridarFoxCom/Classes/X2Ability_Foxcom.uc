@@ -5,10 +5,139 @@ static function array<X2DataTemplate> CreateTemplates()
 	local array<X2DataTemplate> Templates;
 
 	//Templates.AddItem(IRI_FM_OverwatchShot());
+	Templates.AddItem(IRI_FM_WeakpointTargeting_Enable());
+	Templates.AddItem(IRI_FM_WeakpointTargeting_Disable());
+
 	Templates.AddItem(IRI_FM_WeakpointShot());
 	Templates.AddItem(IRI_FM_IgnoreCoverDefense());
 
 	return Templates;
+}
+
+static function X2AbilityTemplate IRI_FM_WeakpointTargeting_Enable()
+{
+	local X2AbilityTemplate Template;	
+
+	Template = CreateToggleOnAbility('IRI_FM_WeakpointTargeting_Enable', class'Foxcom'.default.WeakpointTargetingValue);
+
+	//	Icon setup
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_HideIfOtherAvailable;
+	Template.HideIfAvailable.AddItem('IRI_FM_WeakpointTargeting_Disable');
+	Template.bHideOnClassUnlock = true;
+	Template.DisplayTargetHitChance = false;
+	Template.AbilitySourceName = 'eAbilitySource_Standard';
+	Template.IconImage = "img:///JetPacks_UI.JetShot";
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.STANDARD_SHOT_PRIORITY + 5;
+	//Template.AbilityConfirmSound = "TacticalUI_Activate_Ability_Run_N_Gun";
+
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+	Template.TargetingMethod = class'X2TargetingMethod_Weakpoint';
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileUnitDisallowMindControlProperty);
+
+	return Template;
+}
+static function X2AbilityTemplate IRI_FM_WeakpointTargeting_Disable()
+{
+	local X2AbilityTemplate Template;	
+
+	Template = CreateToggleOffAbility('IRI_FM_WeakpointTargeting_Disable', class'Foxcom'.default.WeakpointTargetingValue);
+
+	//	Icon setup
+	Template.eAbilityIconBehaviorHUD = eAbilityIconBehavior_HideIfOtherAvailable;
+	Template.HideIfAvailable.AddItem('IRI_FM_WeakpointTargeting_Enable');
+	Template.bHideOnClassUnlock = true;
+	Template.DisplayTargetHitChance = false;
+	Template.AbilitySourceName = 'eAbilitySource_Standard';
+	Template.IconImage = "img:///JetPacks_UI.JetShot";
+	Template.ShotHUDPriority = class'UIUtilities_Tactical'.const.STANDARD_SHOT_PRIORITY + 5;
+	//Template.AbilityConfirmSound = "TacticalUI_Activate_Ability_Run_N_Gun";
+
+	Template.AbilityTargetStyle = default.SimpleSingleTarget;
+	Template.TargetingMethod = class'X2TargetingMethod_Weakpoint';
+	Template.AbilityTargetConditions.AddItem(default.LivingHostileUnitDisallowMindControlProperty);
+
+	return Template;
+}
+
+static final function X2AbilityTemplate CreateToggleOffAbility(const name TemplateName, const name UnitValueName)
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_ClearUnitValue ClearUnitValue;
+	local X2Condition_UnitValue UnitValueCondition;
+	
+	`CREATE_X2ABILITY_TEMPLATE(Template, TemplateName);
+
+	// Shooter Conditions
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
+	UnitValueCondition = new class'X2Condition_UnitValue';
+	UnitValueCondition.AddCheckValue(UnitValueName, 1);
+	Template.AbilityShooterConditions.AddItem(UnitValueCondition);
+	//Template.AddShooterEffectExclusions();
+
+	//	Targeting and triggering
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	//	Abilit Costs
+	Template.AbilityCosts.AddItem(default.FreeActionCost);
+
+	//	Ability Effects
+	ClearUnitValue = new class'X2Effect_ClearUnitValue';
+	ClearUnitValue.UnitValueName = UnitValueName;
+	Template.AddShooterEffect(ClearUnitValue);
+
+	//	Visualization
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.Hostility = eHostility_Neutral;
+
+	Template.bShowActivation = true;
+	Template.bSkipFireAction = true;
+	
+	return Template;
+}
+static final function X2AbilityTemplate CreateToggleOnAbility(const name TemplateName, const name UnitValueName)
+{
+	local X2AbilityTemplate Template;
+	local X2Effect_SetUnitValue SetUnitValue;
+	local X2Condition_UnitValue UnitValueCondition;
+	
+	`CREATE_X2ABILITY_TEMPLATE(Template, TemplateName);
+
+	// Shooter Conditions
+	Template.AbilityShooterConditions.AddItem(default.LivingShooterProperty);
+
+	UnitValueCondition = new class'X2Condition_UnitValue';
+	UnitValueCondition.AddCheckValue(UnitValueName, 0);
+	Template.AbilityShooterConditions.AddItem(UnitValueCondition);
+	//Template.AddShooterEffectExclusions();
+
+	//	Targeting and triggering
+	Template.AbilityToHitCalc = default.DeadEye;
+	Template.AbilityTargetStyle = default.SelfTarget;
+	Template.AbilityTriggers.AddItem(default.PlayerInputTrigger);
+
+	//	Abilit Costs
+	Template.AbilityCosts.AddItem(default.FreeActionCost);
+
+	//	Ability Effects
+	SetUnitValue = new class'X2Effect_SetUnitValue';
+	SetUnitValue.UnitName = UnitValueName;
+	SetUnitValue.NewValueToSet = 1;
+	SetUnitValue.CleanupType = eCleanup_BeginTactical;
+	Template.AddShooterEffect(SetUnitValue);
+
+	//	Visualization
+	Template.BuildNewGameStateFn = TypicalAbility_BuildGameState;
+	Template.BuildVisualizationFn = TypicalAbility_BuildVisualization;
+	Template.Hostility = eHostility_Neutral;
+
+	Template.bShowActivation = true;
+	Template.bSkipFireAction = true;
+	
+	return Template;
 }
 
 static function X2AbilityTemplate IRI_FM_WeakpointShot()
@@ -18,6 +147,8 @@ static function X2AbilityTemplate IRI_FM_WeakpointShot()
 	Template = class'X2Ability_WeaponCommon'.static.Add_StandardShot('IRI_FM_WeakpointShot');
 
 	Template.TargetingMethod = class'X2TargetingMethod_Weakpoint';
+
+	//Template.AbilityTargetConditions.Length = 0;
 
 	return Template;
 }

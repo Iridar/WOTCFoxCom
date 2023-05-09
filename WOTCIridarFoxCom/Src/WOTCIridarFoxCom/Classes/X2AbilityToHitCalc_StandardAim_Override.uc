@@ -30,7 +30,7 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 	local float								FinalAdjust;
 	local int i;
 
-	`AMLOG("Running");
+	//`AMLOG("Running");
 
 	// --------------------------- INIT ------------------------
 
@@ -1686,8 +1686,14 @@ static final function PatchAbilityTemplates()
 
 			AbilityTemplate.AbilityToHitCalc = NewCalc;
 		}
+
+		if (AbilityTemplate.AbilityTargetStyle != none && X2AbilityTarget_Self(AbilityTemplate.AbilityTargetStyle) == none)
+		{	
+			AbilityTemplate.AbilityTargetConditions.AddItem(new class'X2Condition_WeakpointTargeting');
+		}
 	}
 
 	AbilityTemplate = AbilityMgr.FindAbilityTemplate('StandardShot');
-	AbilityTemplate.AdditionalAbilities.AddItem('IRI_FM_WeakpointShot');
+	AbilityTemplate.AdditionalAbilities.AddItem('IRI_FM_WeakpointTargeting_Enable');
+	AbilityTemplate.AdditionalAbilities.AddItem('IRI_FM_WeakpointTargeting_Disable');
 }
