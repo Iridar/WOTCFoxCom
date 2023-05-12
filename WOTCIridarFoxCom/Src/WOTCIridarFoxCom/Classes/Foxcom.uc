@@ -1,6 +1,7 @@
 class Foxcom extends Object abstract config(Fox);
 
 var const name WeakpointTargetingValue;
+var const name WeakpointKilledValue;
 
 var config array<name> AutomaticWeaponNames;
 
@@ -22,5 +23,6 @@ static final function bool IsAutomaticWeaponTemplate(const X2WeaponTemplate Weap
 
 defaultproperties
 {
+	WeakpointKilledValue = "IRI_FM_WeakpointKilled_Value"
 	WeakpointTargetingValue = "IRI_FM_WeakpointTargeting_Value"
 }

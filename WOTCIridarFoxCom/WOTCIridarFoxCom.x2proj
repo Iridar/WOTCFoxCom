@@ -165,6 +165,9 @@
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2Action_BeginStandardShotTargeting.uc">
       <SubType>Content</SubType>
     </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\X2Action_Death_Override.uc">
+      <SubType>Content</SubType>
+    </Content>
     <Content Include="Src\WOTCIridarFoxCom\Classes\X2Character_Weakpoints.uc">
       <SubType>Content</SubType>
     </Content>
@@ -274,6 +277,9 @@
       <SubType>Content</SubType>
     </Content>
     <Content Include="Config\WeaponChanges\4FinalAdjustments\XComTemplateEditor.ini">
+      <SubType>Content</SubType>
+    </Content>
+    <Content Include="Src\WOTCIridarFoxCom\Classes\XComGameState_Unit_Override.uc">
       <SubType>Content</SubType>
     </Content>
   </ItemGroup>

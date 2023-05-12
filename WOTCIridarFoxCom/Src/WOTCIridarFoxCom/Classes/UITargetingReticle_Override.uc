@@ -9,8 +9,6 @@ simulated public function UpdateLocation()
 	local vector				WeakpointLocation;
 	local XComGameState_Unit	TargetUnit;
 	local XGUnit				TargetVisualizer;
-
-	`AMLOG("Running");
 		
 	if( m_kTarget != none )
 	{

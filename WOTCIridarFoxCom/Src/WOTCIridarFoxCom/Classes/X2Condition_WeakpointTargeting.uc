@@ -29,6 +29,7 @@ event name CallMeetsConditionWithSource(XComGameState_BaseObject kTarget, XComGa
 { 
 	local XComGameState_Unit	SourceUnit;
 	local XComGameState_Unit	TargetUnit;
+	local UnitValue				UV;
 	
 	SourceUnit = XComGameState_Unit(kSource);
 	TargetUnit = XComGameState_Unit(kTarget);
@@ -39,7 +40,7 @@ event name CallMeetsConditionWithSource(XComGameState_BaseObject kTarget, XComGa
 		if (class'Foxcom'.static.IsUnitWeakpointTargeting(SourceUnit))
 		{
 			// During weakpoint targeting, we want only subsystem units as viable targets.
-			if (TargetUnit == none || !TargetUnit.m_bSubsystem)
+			if (TargetUnit == none || !TargetUnit.m_bSubsystem || TargetUnit.GetUnitValue(class'Foxcom'.default.WeakpointKilledValue, UV))
 			{
 				return 'AA_UnitIsWrongType';
 			}
