@@ -6,6 +6,7 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 {
 	local XComGameState_Unit				SourceUnit;
 	local XComGameState_Unit				TargetUnit;
+	local XComGameState_Unit				TargetWeakpoint;
 	local XComGameState_Item				SourceWeapon;
 	local XComGameStateHistory				History;
 	local X2AbilityTemplate					AbilityTemplate;
@@ -28,6 +29,10 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 	local float								CoverAngleBonus;
 	local float								HeightAdvantageBonus;
 	local float								FinalAdjust;
+	local X2WeakpointTemplate				WeakpointTemplate;
+	local bool								bWeakpoint;
+	local bool								bIgnoreGraze;
+	local string							IgnoreGrazeReason;
 	local int i;
 
 	//`AMLOG("Running");
@@ -47,6 +52,17 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 		return 0;
 
 	TargetUnit = XComGameState_Unit(History.GetGameStateForObjectID(kTarget.PrimaryTarget.ObjectID));
+	if (TargetUnit != none)
+	{
+	    WeakpointTemplate = X2WeakpointTemplate(TargetUnit.GetMyTemplate());
+		if (WeakpointTemplate != none)
+		{
+			bWeakpoint = true;
+			TargetWeakpoint = TargetUnit;
+			TargetUnit = XComGameState_Unit(History.GetGameStateForObjectID(TargetWeakpoint.OwningObjectId));
+		}
+		
+	}
 	SourceWeapon = kAbility.GetSourceWeapon();		
 	
 	//  reset shot breakdown
@@ -81,6 +97,7 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 
 	// Built-in ability modifier.
 	AddModifier(BuiltInHitMod, AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
+	if (bWeakpoint) AddModifier(BuiltInCritMod, AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Crit, bDebugLog);
 
 	//  Source unit's Aim stat.
 	AddModifier(SourceUnit.GetBaseStat(eStat_Offense), class'XLocalizedData'.default.OffenseStat, m_ShotBreakdown, eHit_Success, bDebugLog);
@@ -193,6 +210,38 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 		//}
 	}
 
+	// --------------------------- CRIT CHANCE ------------------------
+
+	if (bWeakpoint && bAllowCrit)
+	{
+		AddModifier(SourceUnit.GetBaseStat(eStat_CritChance), class'XLocalizedData'.default.CharCritChance, m_ShotBreakdown, eHit_Crit, bDebugLog);
+		SourceUnit.GetStatModifiers(eStat_CritChance, StatMods, StatModValues);
+		for (i = 0; i < StatMods.Length; ++i)
+		{
+			AddModifier(int(StatModValues[i]), StatMods[i].GetX2Effect().FriendlyName, m_ShotBreakdown, eHit_Crit, bDebugLog);
+		}
+		if (bSquadsight)
+		{
+			AddModifier(default.SQUADSIGHT_CRIT_MOD, class'XLocalizedData'.default.SquadsightMod, m_ShotBreakdown, eHit_Crit, bDebugLog);
+		}
+
+		if (SourceWeapon !=  none)
+		{
+			AddModifier(SourceWeapon.GetItemCritChance(), class'XLocalizedData'.default.WeaponCritBonus, m_ShotBreakdown, eHit_Crit, bDebugLog);
+		}
+		if (bFlanking && !bMeleeAttack)
+		{
+			if (`XENGINE.IsMultiplayerGame())
+			{
+				AddModifier(default.MP_FLANKING_CRIT_BONUS, class'XLocalizedData'.default.FlankingCritBonus, m_ShotBreakdown, eHit_Crit, bDebugLog);
+			}				
+			else
+			{
+				AddModifier(SourceUnit.GetCurrentStat(eStat_FlankingCritChance), class'XLocalizedData'.default.FlankingCritBonus, m_ShotBreakdown, eHit_Crit, bDebugLog);
+			}
+		}
+	}
+
 	// --------------------------- SHOOTER EFFECTS ------------------------
 
 	foreach SourceUnit.AffectedByEffects(EffectRef)
@@ -217,12 +266,18 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 
 			for (i = 0; i < EffectModifiers.Length; ++i)
 			{
-				// Skip crit and dodge.
-				if (EffectModifiers[i].ModType == eHit_Crit || EffectModifiers[i].ModType == eHit_Graze)
+				if ((!bAllowCrit || !bWeakpoint) && EffectModifiers[i].ModType == eHit_Crit)
+				{
+					//if (!PersistentEffect.AllowCritOverride())
 						continue;
-				
+				}
 				AddModifier(EffectModifiers[i].Value, EffectModifiers[i].Reason, m_ShotBreakdown, EffectModifiers[i].ModType, bDebugLog);
 			}
+		}
+		if (PersistentEffect.ShotsCannotGraze())
+		{
+			bIgnoreGraze = true;
+			IgnoreGrazeReason = PersistentEffect.FriendlyName;
 		}
 	}
 
@@ -251,13 +306,21 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 
 			for (i = 0; i < EffectModifiers.Length; ++i)
 			{
-				// Skip crit and dodge.
-				if (EffectModifiers[i].ModType == eHit_Graze || EffectModifiers[i].ModType == eHit_Crit)
+				if ((!bAllowCrit || !bWeakpoint) && EffectModifiers[i].ModType == eHit_Crit)
+					continue;
+
+				if ((bIgnoreGraze || bWeakpoint )&& EffectModifiers[i].ModType == eHit_Graze)
 					continue;
 
 				AddModifier(EffectModifiers[i].Value, EffectModifiers[i].Reason, m_ShotBreakdown, EffectModifiers[i].ModType, bDebugLog);
 			}
 		}
+	}
+
+	//  Remove graze if shooter ignores graze chance.
+	if (bIgnoreGraze || !bWeakpoint)
+	{
+		AddModifier(-m_ShotBreakdown.ResultTable[eHit_Graze], IgnoreGrazeReason, m_ShotBreakdown, eHit_Graze, bDebugLog);
 	}
 	
 	// --------------------------- FINALIZATION ------------------------
@@ -268,15 +331,158 @@ protected function int GetHitChance(XComGameState_Ability kAbility, AvailableTar
 		AddModifier(-int(FinalAdjust), AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
 		AddReactionFlatModifier(SourceUnit, TargetUnit, m_ShotBreakdown, bDebugLog);
 	}
-	else if (FinalMultiplier != 1.0f)
+
+	if (FinalMultiplier != 1.0f)
 	{
 		FinalAdjust = m_ShotBreakdown.ResultTable[eHit_Success] * FinalMultiplier;
 		AddModifier(-int(FinalAdjust), AbilityTemplate.LocFriendlyName, m_ShotBreakdown, eHit_Success, bDebugLog);
 	}
-
-	FinalizeHitChance(m_ShotBreakdown, bDebugLog);
+	if (bWeakpoint)
+	{
+		AddModifier(-100, "Weakpoint", m_ShotBreakdown, eHit_Success, bDebugLog);
+		AddModifier(m_ShotBreakdown.ResultTable[eHit_Crit], "Weakpoint Crit", m_ShotBreakdown, eHit_Success, bDebugLog);
+		AddModifier(-m_ShotBreakdown.ResultTable[eHit_Graze], "Dodge", m_ShotBreakdown, eHit_Success, bDebugLog);
+		
+		FinalizeHitChance_Weakpoint(m_ShotBreakdown, WeakpointTemplate, TargetWeakpoint, bDebugLog);
+	}
+	else
+	{
+		FinalizeHitChance_Standard(m_ShotBreakdown, bDebugLog);
+	}
 	return m_ShotBreakdown.FinalHitChance;
 
+}
+
+protected function FinalizeHitChance_Standard(out ShotBreakdown m_ShotBreakdown, bool bDebugLog = false)
+{
+	local int i;
+	local EAbilityHitResult HitResult;
+	// Vars for Issue #555
+	local bool OverrideHitChanceCalc;
+	local delegate<OverrideFinalHitChance> OverrideFn;
+	// End Issue #555
+
+	// Start Issue #555
+	OverrideHitChanceCalc = false;
+	foreach OverrideFinalHitChanceFns(OverrideFn)
+	{
+		OverrideHitChanceCalc = OverrideHitChanceCalc || OverrideFn(self, m_ShotBreakdown);
+	}
+
+	// If any of the delegate functions returns true, then we skip the default
+	// processing of the hit chance.
+	if (OverrideHitChanceCalc)
+	{
+		return;
+	}
+	// End Issue #555
+
+	`log("==" $ GetFuncName() $ "==\n", bDebugLog, 'XCom_HitRolls');
+	`log("Starting values...", bDebugLog, 'XCom_HitRolls');
+	for (i = 0; i < eHit_MAX; ++i)
+	{
+		HitResult = EAbilityHitResult(i);
+		`log(HitResult $ ":" @ m_ShotBreakdown.ResultTable[i], bDebugLog, 'XCom_HitRolls');
+	}
+
+	m_ShotBreakdown.FinalHitChance = m_ShotBreakdown.ResultTable[eHit_Success];
+
+	//  cap success at 100 so it can be fully overridden by crit
+	m_ShotBreakdown.ResultTable[eHit_Success] = min(m_ShotBreakdown.ResultTable[eHit_Success], 100);
+
+	if (m_ShotBreakdown.FinalHitChance >= 100)
+	{
+		m_ShotBreakdown.ResultTable[eHit_Miss] = 0;
+	}
+	else
+	{
+		m_ShotBreakdown.ResultTable[eHit_Miss] = 100 - m_ShotBreakdown.FinalHitChance;
+	}
+	
+	`log("Calculated values...", bDebugLog, 'XCom_HitRolls');
+	for (i = 0; i < eHit_MAX; ++i)
+	{
+		HitResult = EAbilityHitResult(i);
+		`log(HitResult $ ":" @ m_ShotBreakdown.ResultTable[i], bDebugLog, 'XCom_HitRolls');
+	}
+	`log("Final hit chance (success + crit + graze) =" @ m_ShotBreakdown.FinalHitChance, bDebugLog, 'XCom_HitRolls');
+
+	//"Negative chance to hit" is used as a token in UI code - don't ever report that.
+	if (m_ShotBreakdown.FinalHitChance < 0)
+	{
+		`log("FinalHitChance was less than 0 (" $ m_ShotBreakdown.FinalHitChance $ ") and was clamped to avoid confusing the UI (@btopp).", bDebugLog, 'XCom_HitRolls');
+		m_ShotBreakdown.FinalHitChance = 0;
+	}
+}
+
+protected function FinalizeHitChance_Weakpoint(out ShotBreakdown m_ShotBreakdown, X2WeakpointTemplate WeakpointTemplate, XComGameState_Unit TargetWeakpoint, bool bDebugLog = false)
+{
+	local int i;
+	local EAbilityHitResult HitResult;
+	// Vars for Issue #555
+	local bool OverrideHitChanceCalc;
+	local delegate<OverrideFinalHitChance> OverrideFn;
+	// End Issue #555
+
+	// Start Issue #555
+	OverrideHitChanceCalc = false;
+	foreach OverrideFinalHitChanceFns(OverrideFn)
+	{
+		OverrideHitChanceCalc = OverrideHitChanceCalc || OverrideFn(self, m_ShotBreakdown);
+	}
+
+	// If any of the delegate functions returns true, then we skip the default
+	// processing of the hit chance.
+	if (OverrideHitChanceCalc)
+	{
+		return;
+	}
+	// End Issue #555
+
+	`log("==" $ GetFuncName() $ "==\n", bDebugLog, 'XCom_HitRolls');
+	`log("Starting values...", bDebugLog, 'XCom_HitRolls');
+	for (i = 0; i < eHit_MAX; ++i)
+	{
+		HitResult = EAbilityHitResult(i);
+		`log(HitResult $ ":" @ m_ShotBreakdown.ResultTable[i], bDebugLog, 'XCom_HitRolls');
+	}
+
+	// Crit is effectively hit chance for weakpoints.
+	// So roll remaining hit chance into crit.
+	m_ShotBreakdown.ResultTable[eHit_Crit] = m_ShotBreakdown.ResultTable[eHit_Success];
+	m_ShotBreakdown.ResultTable[eHit_Success] = 0;
+
+	// Dodge chance reduces chance to hit a weakpoint
+	//m_ShotBreakdown.ResultTable[eHit_Crit] -= m_ShotBreakdown.ResultTable[eHit_Graze];
+
+	m_ShotBreakdown.FinalHitChance = m_ShotBreakdown.ResultTable[eHit_Crit];
+
+	if (m_ShotBreakdown.ResultTable[eHit_Crit] < 0)
+		m_ShotBreakdown.ResultTable[eHit_Crit] = 0;
+
+	if (m_ShotBreakdown.FinalHitChance >= 100)
+	{
+		m_ShotBreakdown.ResultTable[eHit_Miss] = 0;
+	}
+	else
+	{
+		m_ShotBreakdown.ResultTable[eHit_Miss] = 100 - m_ShotBreakdown.FinalHitChance;
+	}
+	
+	`log("Calculated values...", bDebugLog, 'XCom_HitRolls');
+	for (i = 0; i < eHit_MAX; ++i)
+	{
+		HitResult = EAbilityHitResult(i);
+		`log(HitResult $ ":" @ m_ShotBreakdown.ResultTable[i], bDebugLog, 'XCom_HitRolls');
+	}
+	`log("Final hit chance (success + crit + graze) =" @ m_ShotBreakdown.FinalHitChance, bDebugLog, 'XCom_HitRolls');
+
+	//"Negative chance to hit" is used as a token in UI code - don't ever report that.
+	if (m_ShotBreakdown.FinalHitChance < 0)
+	{
+		`log("FinalHitChance was less than 0 (" $ m_ShotBreakdown.FinalHitChance $ ") and was clamped to avoid confusing the UI (@btopp).", bDebugLog, 'XCom_HitRolls');
+		m_ShotBreakdown.FinalHitChance = 0;
+	}
 }
 
 // Reduce the cover bonus based on height difference and distance between units.

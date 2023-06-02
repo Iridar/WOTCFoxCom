@@ -22,11 +22,11 @@ simulated public function UpdateLocation()
 				TargetVisualizer = XGUnit(TargetUnit.GetVisualizer());
 				if (TargetVisualizer != none)
 				{
-					`AMLOG("Looking for socket:" @ WeakpointTemplate.SocketName);
+					//`AMLOG("Looking for socket:" @ WeakpointTemplate.SocketName);
 					if (GetWeakpointLocation(TargetVisualizer, WeakpointTemplate.SocketName, WeakpointLocation))
 					{
 						AimingLocation = WeakpointLocation;
-						`AMLOG("have weakpoint location" @ AimingLocation.X @ AimingLocation.Y @ AimingLocation.Z);
+						//`AMLOG("have weakpoint location" @ AimingLocation.X @ AimingLocation.Y @ AimingLocation.Z);
 					}
 				}
 			}
@@ -54,13 +54,13 @@ final function bool GetWeakpointLocation(XGUnit TargetedUnit, const name SocketN
 	UnitPawn = TargetedUnit.GetPawn();
 	if (UnitPawn == none)
 	{
-		`AMLOG("No target pawn.");
+		//`AMLOG("No target pawn.");
 		return false;
 	}
 
 	if (UnitPawn.Mesh.GetSocketWorldLocationAndRotation(SocketName, WeakpointLocation))
 	{
-		`AMLOG("Got the following coordinates for CIN_Root:" @ WeakpointLocation.X  @ WeakpointLocation.Y @ WeakpointLocation.Z);
+		//`AMLOG("Got the following coordinates for CIN_Root:" @ WeakpointLocation.X  @ WeakpointLocation.Y @ WeakpointLocation.Z);
 		return true;
 	}
 	return false;
